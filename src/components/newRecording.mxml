@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009"
+		 xmlns:s="library://ns.adobe.com/flex/spark"
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 xmlns:valueObjects="valueObjects.*"
+		 xmlns:kingservice="services.kingservice.*"
+		 xmlns:components="components.*"
+		 width="810" height="662">
+	<fx:Script>
+		<![CDATA[
+			import mx.controls.Alert;
+			import mx.events.FlexEvent;
+			import mx.rpc.events.ResultEvent;
+			
+			
+			
+			protected function form_creationCompleteHandler(event:FlexEvent):void
+			{
+				
+				getLabelsResult.token = kingService.getLabels();
+			}
+			
+			
+			protected function button_clickHandler(event:MouseEvent):void
+			{
+				recording = new Recording();
+				recording.recordingTitle = recordingTitleTextInput.text;
+				recording.label = parseInt(this.cboLabels.selectedItem.data);
+				recording.yearReleasedString = yearReleasedStringTextInput.text;
+				recording.Musicians = musiciansTextInput.text;
+				recording.soundfile = soundfileTextInput.text;
+				recording.recording_notes = recording_notesTextInput.text;
+				recording.link = linkTextInput.text;
+				recording.image = imageTextInput.text;
+				recording.mediaType = this.cboMediaTypes.selectedItem.data;
+				createRecordingResult.token = kingService.createRecording(recording);
+			}
+			
+			protected function createRecordingResult_resultHandler(event:ResultEvent):void
+			{
+				this.parentApplication.refreshRecordingList();
+				this.parentApplication.currentState = '';
+				
+			}
+			
+			protected function btnCancelNewRecording_clickHandler(event:MouseEvent):void
+			{
+				this.parentApplication.currentState = '';
+				
+			}
+			
+			
+			protected function cboMediaTypes_creationCompleteHandler(event:FlexEvent):void
+			{
+				getMediaTypesResult.token = kingService.getMediaTypes();
+			}
+			
+			public function clearFields():void{
+				this.recordingTitleTextInput.text = '';
+				this.recording_notesTextInput.text = '';
+				this.yearReleasedStringTextInput.text = '';
+				this.musiciansTextInput.text = '';
+				this.soundfileTextInput.text = '';
+				this.linkTextInput.text = '';
+				this.imageTextInput.text = '';
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<valueObjects:Recording id="recording"/>
+		<kingservice:KingService id="kingService"
+								 fault="Alert.show(event.fault.faultString + '\n' + event.fault.faultDetail)"
+								 showBusyCursor="true"/>
+		<s:CallResponder id="getRecordingDetailsResult"
+						 result="recording = getRecordingDetailsResult.lastResult[0] as Recording"/>
+		<s:CallResponder id="getLabelsResult"/>
+		<s:CallResponder id="createRecordingResult" result="createRecordingResult_resultHandler(event)"/>
+		<s:CallResponder id="getMediaTypesResult"/>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:Form id="form" width="594" creationComplete="form_creationCompleteHandler(event)"
+			defaultButton="{button}">
+		<s:FormItem width="547" label="Media Title">
+			<s:TextInput id="recordingTitleTextInput" width="433" text=""/>
+		</s:FormItem>
+		<s:FormItem label="Label">
+			<components:comboBox2 id="cboLabels" x="681" y="536" dataProvider="{this.getLabelsResult.lastResult}"/>
+		</s:FormItem>
+		<s:FormItem label="Media Type">
+			<components:comboBox2 id="cboMediaTypes" x="681" y="536"
+								  creationComplete="cboMediaTypes_creationCompleteHandler(event)"
+								  dataProvider="{getMediaTypesResult.lastResult}"/>
+		</s:FormItem>
+		<s:FormItem label="Year Released">
+			<s:TextInput id="yearReleasedStringTextInput" text=""/>
+		</s:FormItem>
+		<s:FormItem width="557" label="Musicians">
+			<s:TextInput id="musiciansTextInput" width="441" text=""/>
+		</s:FormItem>
+		<s:FormItem width="557" label="Soundfile">
+			<s:TextInput id="soundfileTextInput" width="442" text=""/>
+		</s:FormItem>
+		<s:FormItem width="569" label="Media Notes">
+			<s:TextArea id="recording_notesTextInput" width="445" text=""/>
+		</s:FormItem>
+		<s:FormItem width="568" label="Purchase Link">
+			<s:TextInput id="linkTextInput" width="443" text=""/>
+		</s:FormItem>
+		<s:FormItem label="Image">
+			<s:TextInput id="imageTextInput" width="443" text=""/>
+		</s:FormItem>
+		<s:Button id="button" label="Submit" click="button_clickHandler(event)"/>
+		<s:Button id="btnCancelNewRecording" label="Cancel"
+				  click="btnCancelNewRecording_clickHandler(event)"/>
+	</s:Form>
+</s:Group>

@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009"
+		 xmlns:s="library://ns.adobe.com/flex/spark"
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 xmlns:kingservice="services.kingservice.*"
+		 xmlns:valueObjects="valueObjects.*"
+		 width="962" height="670">
+	<fx:Script>
+		<![CDATA[
+			import mx.controls.Alert;
+			import mx.rpc.events.ResultEvent;
+			
+			import valueObjects.Tbl_Works;
+			
+			
+			public var workID:int;
+			
+			/*
+			protected function button_clickHandler(event:MouseEvent):void
+			{
+				gettbl_WorksResult.token = kingService.gettbl_Works(parseFloat(idTextInput.text));
+			}
+			*/
+			
+			protected function button2_clickHandler(event:MouseEvent):void
+			{
+				
+				work.Year = yearDateField.selectedDate;
+				work.title = titleTextInput.text;
+				work.scoreFilename = scoreFilenameTextInput.text;
+				work.instrumentationString = instrumentationStringTextInput.text;
+				work.yearString = yearStringTextInput.text;
+				work.timingString = timingStringTextInput.text;
+				work.Work_Performance_Comments = work_Performance_CommentsTextInput.text;
+				work.premiere = premiereTextInput.text;
+				work.timing = parseInt(timingTextInput.text);
+				this.createtbl_Works2(work);
+				
+			}
+			
+			
+			protected function updatetbl_Works(item:Tbl_Works):void
+			{
+				updatetbl_WorksResult.token = kingService.updatetbl_Works(item);
+			}
+			
+			
+			protected function updatetbl_Works2(item:Work):void
+			{
+				updatetbl_Works2Result.token = kingService.updatetbl_Works2(item);
+			}
+			
+			protected function updatetbl_Works2Result_resultHandler(event:ResultEvent):void
+			{
+				this.parentApplication.getAlltbl_WorksResult.token = kingService.getAlltbl_Works();
+				this.parentApplication.currentState='';
+				
+			}
+			
+			
+			protected function createtbl_Works2(item:Work):void
+			{
+				createtbl_Works2Result.token = kingService.createtbl_Works2(item);
+			}
+			
+			protected function createtbl_Works2Result_resultHandler(event:ResultEvent):void
+			{
+				this.parentApplication.getAlltbl_WorksResult.token = kingService.getAlltbl_Works();
+				
+				this.parentApplication.currentState='';
+				
+			}
+			
+			public function initializeForm():void{
+				this.titleTextInput.text = '';
+				this.yearDateField.selectedDate = null;
+				this.yearStringTextInput.text = '';
+				this.premiereTextInput.text = '';
+				this.instrumentationStringTextInput.text = '';
+				this.timingStringTextInput.text = '';
+				this.timingTextInput.text = '';
+				this.work_Performance_CommentsTextInput.text = '';
+				
+			}
+			
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<kingservice:KingService id="kingService"
+								 fault="Alert.show(event.fault.faultString + '\n' + event.fault.faultDetail)"
+								 showBusyCursor="true"/>
+		<s:CallResponder id="gettbl_WorksResult"
+						 result="work = gettbl_WorksResult.lastResult[0] as Work"/>
+		<valueObjects:Work id="work"/>
+		<s:CallResponder id="updatetbl_WorksResult"/>
+		<s:CallResponder id="updatetbl_Works2Result" result="updatetbl_Works2Result_resultHandler(event)"/>
+		<s:CallResponder id="createtbl_Works2Result" result="createtbl_Works2Result_resultHandler(event)"/>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<s:Form width="641" >
+		<s:FormHeading label="Work" visible="false"/>
+		<s:FormItem width="616" label="Title">
+			<s:TextInput id="titleTextInput" width="401" text=""/>
+		</s:FormItem>
+		<s:FormItem width="614" label="Year">
+			<mx:DateField id="yearDateField" />
+		</s:FormItem>
+		<s:FormItem width="615" label="YearString">
+			<s:TextInput id="yearStringTextInput" text=""/>
+		</s:FormItem>
+		<s:FormItem width="615" label="Premiere">
+			<s:TextInput id="premiereTextInput" width="407" text=""/>
+		</s:FormItem>
+		<s:FormItem width="615" label="InstrumentationString">
+			<s:TextInput id="instrumentationStringTextInput" width="407"
+						 text=""/>
+		</s:FormItem>
+		<s:FormItem width="618" label="Timing">
+			<s:TextInput id="timingTextInput" text=""/>
+		</s:FormItem>
+		<s:FormItem width="620" label="TimingString">
+			<s:TextInput id="timingStringTextInput" text=""/>
+		</s:FormItem>
+		<s:FormItem width="622" label="Work_Performance_Comments">
+			<s:TextArea id="work_Performance_CommentsTextInput" width="372"
+						text=""/>
+		</s:FormItem>
+		<s:FormItem label="Id" visible="false">
+			<s:TextInput id="idTextInput2" text="" visible="false"/>
+		</s:FormItem>
+		<s:Button id="btnSaveChanges" label="Create New Work" click="button2_clickHandler(event)"/>
+		<s:FormItem label="ScoreFilename" visible="false">
+			<s:TextInput id="scoreFilenameTextInput" text="" visible="false"/>
+		</s:FormItem>
+	</s:Form>
+</s:Group>

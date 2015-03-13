@@ -1,0 +1,428 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009"
+		 xmlns:s="library://ns.adobe.com/flex/spark"
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 xmlns:kingservice="services.kingservice.*"
+		 xmlns:valueObjects="valueObjects.*"
+		 xmlns:components="components.*"
+		 width="962" height="670" creationComplete="group1_creationCompleteHandler(event)">
+	<fx:Script>
+		<![CDATA[
+			import mx.controls.Alert;
+			import mx.events.FlexEvent;
+			import mx.rpc.events.ResultEvent;
+			
+			import valueObjects.ImageData;
+			import valueObjects.Tbl_Works;
+			
+			
+			public var workID:int;
+			
+			public var imageMode:String = 'NEW';
+			
+			/*
+			protected function button_clickHandler(event:MouseEvent):void
+			{
+				gettbl_WorksResult.token = kingService.gettbl_Works(parseFloat(idTextInput.text));
+			}
+			*/
+			
+			protected function button2_clickHandler(event:MouseEvent):void
+			{
+				
+				work.Year = yearDateField.selectedDate;
+				work.title = titleTextInput.text;
+				work.scoreFilename = scoreFilenameTextInput.text;
+				work.instrumentationString = instrumentationStringTextInput.text;
+				work.yearString = yearStringTextInput.text;
+				work.timingString = timingStringTextInput.text;
+				work.Work_Performance_Comments = work_Performance_CommentsTextInput.text;
+				work.premiere = premiereTextInput.text;
+				work.timing = parseInt(timingTextInput.text);
+				this.updatetbl_Works2(work);
+				
+			}
+			
+			
+			protected function updatetbl_Works(item:Tbl_Works):void
+			{
+				updatetbl_WorksResult.token = kingService.updatetbl_Works(item);
+			}
+			
+			
+			protected function updatetbl_Works2(item:Work):void
+			{
+				updatetbl_Works2Result.token = kingService.updatetbl_Works2(item);
+				
+			}
+			
+			protected function updatetbl_Works2Result_resultHandler(event:ResultEvent):void
+			{
+				//this.parentApplication.getAlltbl_WorksResult.token = kingService.getAlltbl_Works();
+				this.parentApplication.currentState='';
+				
+			}
+			
+			
+			protected function cboCategories_creationCompleteHandler(event:FlexEvent):void
+			{
+				getCategoriesResult2.token = kingService.getCategories();
+			}
+			
+			
+			protected function insertCategory(workID:Number, catID:Number):void
+			{
+				insertCategoryResult.token = kingService.insertCategory(workID, catID);
+			}
+			
+			protected function btnAddCategory_clickHandler(event:MouseEvent):void
+			{
+				this.insertCategory(work.id,this.cboCategories.selectedItem.id);
+				
+			}
+			
+			
+			protected function dgCatsForWork_creationCompleteHandler(event:FlexEvent):void
+			{
+				//getCategoriesForWorkResult.token = kingService.getCategoriesForWork(work.id);
+			}
+			
+			
+			
+			protected function insertCategoryResult_resultHandler(event:ResultEvent):void
+			{
+				getCategoriesForWorkResult.token = kingService.getCategoriesForWork(work.id);
+				
+			}
+			
+			
+			protected function btnDeleteCategory_clickHandler(event:MouseEvent):void
+			{
+				deleteCatFromWorkResult.token = kingService.deleteCatFromWork(this.dgCatsForWork.selectedItem.work,this.dgCatsForWork.selectedItem.category);
+			}
+			
+			protected function deleteCatFromWorkResult_resultHandler(event:ResultEvent):void
+			{
+				getCategoriesForWorkResult.token = kingService.getCategoriesForWork(work.id);
+				
+			}
+			
+			
+			protected function dataGrid_creationCompleteHandler(event:FlexEvent):void
+			{
+				//getImagesForWorkResult.token = kingService.getImagesForWork(work.id);
+			}
+			
+			public function getImagesForWork(workID:int):void{
+				getImagesForWorkResult.token = kingService.getImagesForWork(work.id);		
+			}
+			
+			
+			protected function group1_creationCompleteHandler(event:FlexEvent):void
+			{
+				getImageTypes();
+				
+			}
+			
+			
+			protected function getImageTypes():void
+			{
+				getImageTypesResult.token = kingService.getImageTypes();
+			}
+			
+			protected function handleImagesClick():void{
+					this.getDataForImage(this.dgImages.selectedItem.imageID);			
+			}
+			
+			
+			protected function getDataForImage(imageID:Number):void
+			{
+				getDataForImageResult.token = kingService.getDataForImage(imageID);
+			}
+			
+			protected function getDataForImageResult_resultHandler(event:ResultEvent):void
+			{
+				this.txtImageFileName.text = event.result[0].imageFileName;
+				this.cboImageTypes.selectedValue = event.result[0].imageType;
+				this.txtImageDescription.text = event.result[0].imageLabel;
+				this.prepareForImageEdit();
+				
+				
+			}
+			
+			protected function prepareForImageEdit():void{
+				//this.clearImageData();
+				this.btnSaveEdits.visible = false;
+				this.btnSaveChanges.visible = false;
+				this.btnSaveNewImage.visible = false;
+				this.txtImageDescription.visible = true;
+				this.txtImageFileName.visible = true;
+				this.cboImageTypes.visible = true;
+				this.lblDescription.visible = true;
+				this.lblImageFileName.visible = true;
+				this.lblImageType.visible = true;
+			}
+			
+			protected function btnSaveEdits_clickHandler(event:MouseEvent):void
+			{
+				var image:ImageData = new ImageData();
+				image.id = this.dgImages.selectedItem.imageID;
+				image.imageFileName = this.txtImageFileName.text;
+				image.imageLabel = this.txtImageDescription.text;
+				image.imageType = this.cboImageTypes.selectedItem.data;
+				this.updateImageRecord(image);
+				this.turnImageControlsOff();
+				
+				
+			}
+			
+			
+			protected function updateImageRecord(imageData:ImageData):void
+			{
+				updateImageRecordResult.token = kingService.updateImageRecord(imageData);
+			}
+			
+			protected function updateImageRecordResult_resultHandler(event:ResultEvent):void
+			{
+				this.clearImageData();
+				this.imageMode = 'NEW';
+				
+			}
+			
+			protected function btnCancel_clickHandler(event:MouseEvent):void
+			{
+				this.parentApplication.currentState = '';
+				
+			}
+			
+			protected function btnNewImage_clickHandler(event:MouseEvent):void
+			{
+				this.clearImageData();
+				this.btnSaveEdits.visible = false;
+				this.btnSaveChanges.visible = false;
+				this.btnSaveNewImage.visible = true;
+				this.txtImageDescription.visible = true;
+				this.txtImageFileName.visible = true;
+				this.cboImageTypes.visible = true;
+				this.lblDescription.visible = true;
+				this.lblImageFileName.visible = true;
+				this.lblImageType.visible = true;
+				this.imageMode = 'EDIT';
+				
+			}
+			
+			
+			protected function insertImageRecord(imageData:ImageData):void
+			{
+				insertImageRecordResult.token = kingService.insertImageRecord(imageData);
+			}
+			
+			protected function btnSaveNewImage_clickHandler(event:MouseEvent):void
+			{
+				var image:ImageData = new ImageData();
+				image.imageFileName = this.txtImageFileName.text;
+				image.imageLabel = this.txtImageDescription.text;
+				image.imageType = this.cboImageTypes.selectedItem.data;
+				this.insertImageRecord(image);
+				
+			}
+			
+			protected function insertImageRecordResult_resultHandler(event:ResultEvent):void
+			{
+				this.clearImageData();
+				var newImageID:int = event.result[0].newImageID;
+				
+				// now create the image work record
+				this.insertImageWorkRecordResult.token = this.kingService.insertImageWorkRecord(work.id,newImageID);
+				this.turnImageControlsOff();
+				
+				
+				
+			}
+			
+			protected function clearImageData():void{
+				this.txtImageDescription.text = '';
+				this.txtImageFileName.text = '';
+				this.cboImageTypes.selectedIndex = -1;	
+			
+			}
+			
+			protected function getImagesForWorkResult_resultHandler(event:ResultEvent):void
+			{
+				// TODO Auto-generated method stub
+				
+			}
+			
+			
+			protected function insertImageWorkRecord(workID:int, imageID:int):void
+			{
+				insertImageWorkRecordResult.token = kingService.insertImageWorkRecord(workID, imageID);
+			}
+			
+			protected function insertImageWorkRecordResult_resultHandler(event:ResultEvent):void
+			{
+				this.getImagesForWork(work.id);
+				
+			}
+			
+			
+			protected function deleteImageWorkRecord(workID:int, imageID:int):void
+			{
+				deleteImageWorkRecordResult.token = kingService.deleteImageWorkRecord(workID, imageID);
+			}
+			
+			
+			protected function btnDeleteImageWork_clickHandler(event:MouseEvent):void
+			{
+				this.deleteImageWorkRecordResult.token = this.kingService.deleteImageWorkRecord(work.id,this.dgImages.selectedItem.imageID);
+				
+			}
+			
+			protected function deleteImageWorkRecordResult_resultHandler(event:ResultEvent):void
+			{
+				
+				this.getImagesForWork(work.id);
+				this.clearImageData();
+				
+			}
+			
+			public function turnImageControlsOff():void{
+				this.btnSaveEdits.visible = false;
+				this.btnSaveChanges.visible = false;
+				this.btnSaveNewImage.visible = false;
+				this.txtImageDescription.visible = false;
+				this.txtImageFileName.visible = false;
+				this.cboImageTypes.visible = false;
+				this.lblDescription.visible = false;
+				this.lblImageFileName.visible = false;
+				this.lblImageType.visible = false;
+			}
+			private function handleTextEdit():void{
+				if (this.imageMode == 'NEW'){
+					this.btnSaveEdits.visible = true;	
+				
+				}
+				
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<kingservice:KingService id="kingService"
+								 fault="Alert.show(event.fault.faultString + '\n' + event.fault.faultDetail)"
+								 showBusyCursor="true"/>
+		<s:CallResponder id="gettbl_WorksResult"
+						 result="work = gettbl_WorksResult.lastResult[0] as Work"/>
+		<valueObjects:Work id="work"/>
+		<s:CallResponder id="updatetbl_WorksResult"/>
+		<s:CallResponder id="updatetbl_Works2Result" result="updatetbl_Works2Result_resultHandler(event)"/>
+		<s:CallResponder id="getCategoriesResult"/>
+		<s:CallResponder id="getCategoriesResult2"/>
+		<s:CallResponder id="insertCategoryResult" result="insertCategoryResult_resultHandler(event)"/>
+		<s:CallResponder id="getCategoriesForWorkResult" />
+		<s:CallResponder id="deleteCatFromWorkResult" result="deleteCatFromWorkResult_resultHandler(event)"/>
+		<s:CallResponder id="getImagesForWorkResult" result="getImagesForWorkResult_resultHandler(event)"/>
+		<s:CallResponder id="getImageTypesResult"/>
+		<s:CallResponder id="getDataForImageResult" result="getDataForImageResult_resultHandler(event)"/>
+		<s:CallResponder id="updateImageRecordResult" result="updateImageRecordResult_resultHandler(event)"/>
+		<s:CallResponder id="insertImageRecordResult" result="insertImageRecordResult_resultHandler(event)"/>
+		<s:CallResponder id="insertImageWorkRecordResult" result="insertImageWorkRecordResult_resultHandler(event)"/>
+		<s:CallResponder id="deleteImageWorkRecordResult" result="deleteImageWorkRecordResult_resultHandler(event)"/>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<s:Form width="641" height="567">
+		<s:FormHeading label="Work" visible="false"/>
+		<s:FormItem width="616" label="Title">
+			<s:TextInput id="titleTextInput" width="401" text="{work.title}"/>
+		</s:FormItem>
+		<s:FormItem width="614" label="Year">
+			<mx:DateField id="yearDateField" selectedDate="{work.Year}"/>
+		</s:FormItem>
+		<s:FormItem width="615" label="YearString">
+			<s:TextInput id="yearStringTextInput" text="{work.yearString}"/>
+		</s:FormItem>
+		<s:FormItem width="615" label="Premiere">
+			<s:TextInput id="premiereTextInput" width="407" text="{work.premiere}"/>
+		</s:FormItem>
+		<s:FormItem width="615" label="InstrumentationString">
+			<s:TextInput id="instrumentationStringTextInput" width="407"
+						 text="{work.instrumentationString}"/>
+		</s:FormItem>
+		<s:FormItem width="618" label="Timing">
+			<s:TextInput id="timingTextInput" text="{work.timing}"/>
+		</s:FormItem>
+		<s:FormItem width="620" label="TimingString">
+			<s:TextInput id="timingStringTextInput" text="{work.timingString}"/>
+		</s:FormItem>
+		<s:FormItem width="622" label="Work_Performance_Comments">
+			<s:TextArea id="work_Performance_CommentsTextInput" width="372"
+						text="{work.Work_Performance_Comments}"/>
+		</s:FormItem>
+		<s:Button id="btnSaveChanges" label="Save Changes" click="button2_clickHandler(event)" visible="true"/>
+		
+			
+		
+		
+		
+		
+		<s:FormItem label="Id" visible="false">
+			<s:TextInput id="idTextInput2" text="{work.id}" visible="false"/>
+		</s:FormItem>
+		<s:FormItem label="ScoreFilename" visible="false">
+			<s:TextInput id="scoreFilenameTextInput" text="{work.scoreFilename}" visible="false"/>
+		</s:FormItem>
+	</s:Form>
+	<s:ComboBox id="cboCategories" x="684" y="11" width="218"
+				creationComplete="cboCategories_creationCompleteHandler(event)"
+				labelField="Category"  prompt="Select/Add Category">
+		<s:AsyncListView list="{getCategoriesResult2.lastResult}"/>
+	</s:ComboBox>
+	<s:Button id="btnAddCategory" x="684" y="42" label="Add Category"
+			  click="btnAddCategory_clickHandler(event)"/>
+	<s:DataGrid id="dgCatsForWork" x="684" y="71" width="256"
+				creationComplete="dgCatsForWork_creationCompleteHandler(event)"
+				requestedRowCount="4">
+		<s:columns>
+			<s:ArrayList>
+				<s:GridColumn dataField="CatLabel" headerText="Categories"></s:GridColumn>
+			</s:ArrayList>
+		</s:columns>
+		<s:typicalItem>
+			<fx:Object category="category1" work="work1"></fx:Object>
+		</s:typicalItem>
+		<s:AsyncListView list="{getCategoriesForWorkResult.lastResult}"/>
+	</s:DataGrid>
+	<s:Button id="btnDeleteCategory" x="684" y="208" label="Delete Selected Category"
+			  click="btnDeleteCategory_clickHandler(event)"/>
+	<s:DataGrid id="dgImages" x="684" y="250" width="256" height="133"
+				 click="handleImagesClick();" >
+		<s:columns>
+			<s:ArrayList>
+				<s:GridColumn dataField="imageLabel" headerText="Image Text"></s:GridColumn>
+			</s:ArrayList>
+		</s:columns>
+		<s:typicalItem>
+			<fx:Object imageFileName="imageFileName1" imageID="imageID1" imageLabel="imageLabel1"
+					   imageType="imageType1"></fx:Object>
+		</s:typicalItem>
+		<s:AsyncListView list="{getImagesForWorkResult.lastResult}"/>
+	</s:DataGrid>
+	<s:Label id="lblImageFileName" x="680" y="435" text="Image File Name:"/>
+	<s:Label id="lblDescription" x="679" y="475" text="Description:"/>
+	<s:Label id="lblImageType" x="681" y="519" text="Image Type:"/>
+	<s:TextInput id="txtImageFileName" x="680" y="450" width="218" change="this.handleTextEdit();"/>
+	<components:comboBox2 id="cboImageTypes" x="681" y="536" dataProvider="{this.getImageTypesResult.lastResult}"/>
+	<s:TextInput id="txtImageDescription" x="680" y="489" width="218" change="this.handleTextEdit();"/>
+	<s:Button id="btnSaveEdits" x="750" y="575" label="Save Edits"
+			  click="btnSaveEdits_clickHandler(event)"/>
+	<s:Button id="btnCancel" x="680" y="643" width="260" label="Return to Main Screen"
+			  click="btnCancel_clickHandler(event)"/>
+	<s:Button id="btnNewImage" x="836" y="394" width="104" label="New Image"
+			  click="btnNewImage_clickHandler(event)"/>
+	<s:Button id="btnSaveNewImage" x="741" y="575" label="Save New Image"
+			  click="btnSaveNewImage_clickHandler(event)"/>
+	<s:Button id="btnDeleteImageWork" x="685" y="394" width="147" label="Delete Selected Image"
+			  click="btnDeleteImageWork_clickHandler(event)"/>
+	<s:Button id="btnSaveChanges2" x="28" y="607" label="Save Changes" click="button2_clickHandler(event)" visible="true"/>
+</s:Group>

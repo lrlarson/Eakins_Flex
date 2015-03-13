@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009"
+		 xmlns:s="library://ns.adobe.com/flex/spark"
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 xmlns:valueObjects="valueObjects.*"
+		 xmlns:kingservice="services.kingservice.*"
+		 xmlns:components="components.*"
+		 width="810" height="662">
+	<fx:Script>
+		<![CDATA[
+			import mx.controls.Alert;
+			import mx.events.FlexEvent;
+			import mx.rpc.events.ResultEvent;
+			
+			public var recordingID:int;
+			
+			protected function form_creationCompleteHandler(event:FlexEvent):void
+			{
+				getLabelsResult.token = kingService.getLabels();
+				//getRecordingDetailsResult.token = kingService.getRecordingDetails(recordingID);
+			}
+			
+			
+			protected function button_clickHandler(event:MouseEvent):void
+			{
+				var recordingNew:Recording = new Recording();
+				recordingNew.recordingTitle = this.recordingTitleTextInput.text;
+				recordingNew.label = parseInt(this.cboLabels.selectedItem.data);
+				//recording.Year_Released = year_ReleasedDateField.selectedDate;
+				recordingNew.yearReleasedString = yearReleasedStringTextInput.text;
+				recordingNew.Musicians = musiciansTextInput.text;
+				recordingNew.soundfile = soundfileTextInput.text;
+				recordingNew.recording_notes = recording_notesTextInput.text;
+				recordingNew.link = linkTextInput.text;
+				recordingNew.image = imageTextInput.text;
+				recordingNew.id = recording.id;
+				recordingNew.mediaType = this.cboMediaType.selectedItem.data;
+				this.updateRecording(recordingNew);
+			}
+			
+			
+			
+			
+			protected function getLabels():void
+			{
+				getLabelsResult.token = kingService.getLabels();
+			}
+			
+			
+			protected function updateRecording(recordingNew:Recording):void
+			{
+				updateRecordingResult.token = kingService.updateRecording(recordingNew);
+			}
+			
+			protected function updateRecordingResult_resultHandler(event:ResultEvent):void
+			{
+				this.parentApplication.currentState='';
+				this.parentApplication.refreshRecordingList();
+				
+			}
+			
+			protected function btnCancelRecordingEdit_clickHandler(event:MouseEvent):void
+			{
+				this.parentApplication.currentState = '';
+				
+			}
+			
+			
+			protected function cboMediaType_creationCompleteHandler(event:FlexEvent):void
+			{
+				getMediaTypesResult.token = kingService.getMediaTypes();
+			}
+			
+			
+			protected function dgRelatedWorks_creationCompleteHandler(event:FlexEvent):void
+			{
+				//getRelatedWorksForMediaTypeResult.token = kingService.getRelatedWorksForMediaType(recording.id);
+			}
+			
+			
+			protected function cboSelectWork_creationCompleteHandler(event:FlexEvent):void
+			{
+				getAlphaListOfWorksResult.token = kingService.getAlphaListOfWorks();
+			}
+			
+			
+			protected function btnAddRelatedWork_clickHandler(event:MouseEvent):void
+			{
+				addWorkToMediaRecordResult.token = kingService.addWorkToMediaRecord(recording.id,this.cboSelectWork.selectedItem.data);
+			}
+			
+			protected function addWorkToMediaRecordResult_resultHandler(event:ResultEvent):void
+			{
+				getRelatedWorksForMediaTypeResult.token = kingService.getRelatedWorksForMediaType(recording.id);
+				
+			}
+			
+			
+			protected function tnDeleteWorkRelationship_clickHandler(event:MouseEvent):void
+			{
+				deleteMediaToWorkRecordResult.token = kingService.deleteMediaToWorkRecord(recording.id,this.dgRelatedWorks.selectedItem.work);
+			}
+			
+			protected function deleteMediaToWorkRecordResult_resultHandler(event:ResultEvent):void
+			{
+				
+				getRelatedWorksForMediaTypeResult.token = kingService.getRelatedWorksForMediaType(recording.id);	
+			}
+			
+			
+			protected function getAlbums():void
+			{
+				getAlbumsResult.token = kingService.getAlbums();
+			}
+			
+			
+			protected function getAlbumsForCBO():void
+			{
+				getAlbumsForCBOResult.token = kingService.getAlbumsForCBO();
+			}
+			
+			
+			protected function dgRelatedAlbums_creationCompleteHandler(event:FlexEvent):void
+			{
+				//getAlbumsForRecordingResult.token = kingService.getAlbumsForRecording(/*Enter value(s) for */ recordingID);
+			}
+			
+			
+			protected function comboBox_creationCompleteHandler(event:FlexEvent):void
+			{
+				getTrackNumbersResult.token = kingService.getTrackNumbers();
+			}
+			
+			
+			protected function btnAssociateTrackWithAlbum_clickHandler(event:MouseEvent):void
+			{
+				createAlbumRecordingResult.token = kingService.createAlbumRecording(this.cboAlbums.selectedItem.DATA, recording.id, this.cboTrackNumbers.selectedItem.data);
+			}
+			
+			protected function createAlbumRecordingResult_resultHandler(event:ResultEvent):void
+			{
+				this.getAlbumsForRecordingResult.token = this.kingService.getAlbumsForRecording(recording.id);
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<valueObjects:Recording id="recording"/>
+		<kingservice:KingService id="kingService"
+								 fault="Alert.show(event.fault.faultString + '\n' + event.fault.faultDetail)"
+								 showBusyCursor="true"/>
+		<s:CallResponder id="getRecordingDetailsResult"
+						 result="recording = getRecordingDetailsResult.lastResult[0] as Recording"/>
+		<s:CallResponder id="getLabelsResult"/>
+		<s:CallResponder id="updateRecordingResult" result="updateRecordingResult_resultHandler(event)"/>
+		<s:CallResponder id="getMediaTypesResult"/>
+		<s:CallResponder id="getRelatedWorksForMediaTypeResult"/>
+		<s:CallResponder id="getAlphaListOfWorksResult"/>
+		<s:CallResponder id="addWorkToMediaRecordResult" result="addWorkToMediaRecordResult_resultHandler(event)"/>
+		<s:CallResponder id="deleteMediaToWorkRecordResult" result="deleteMediaToWorkRecordResult_resultHandler(event)"/>
+		<s:CallResponder id="getAlbumsResult"/>
+		<s:CallResponder id="getAlbumsForCBOResult"/>
+		<s:CallResponder id="getAlbumsForRecordingResult"/>
+		<s:CallResponder id="getTrackNumbersResult"/>
+		<s:CallResponder id="createAlbumRecordingResult" result="createAlbumRecordingResult_resultHandler(event)"/>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:Form id="form" width="534" creationComplete="form_creationCompleteHandler(event)">
+		
+
+		<s:FormItem label="Media Element">
+			<s:TextInput id="recordingTitleTextInput" width="363" text="{recording.recordingTitle}"/>
+		</s:FormItem>
+		<s:FormItem label="Label">
+			<components:comboBox2 id="cboLabels" x="681" y="536" dataProvider="{this.getLabelsResult.lastResult}" selectedValue="{recording.label}"/>
+		</s:FormItem>
+		<s:FormItem label="Media Type">
+			<components:comboBox2 id="cboMediaType" x="681" y="536"
+								  creationComplete="cboMediaType_creationCompleteHandler(event)"
+								  dataProvider="{getMediaTypesResult.lastResult}"
+								  selectedValue="{recording.mediaType}"/>
+		</s:FormItem>
+		<s:FormItem label="Year Released">
+			<s:TextInput id="yearReleasedStringTextInput" text="{recording.yearReleasedString}"/>
+		</s:FormItem>
+		<s:FormItem width="512" label="Musicians">
+			<s:TextInput id="musiciansTextInput" width="352" text="{recording.Musicians}"/>
+		</s:FormItem>
+		<s:FormItem width="512" label="File Name">
+			<s:TextInput id="soundfileTextInput" width="351" text="{recording.soundfile}"/>
+		</s:FormItem>
+		<s:FormItem width="512" label="Notes">
+			<s:TextArea id="recording_notesTextInput" width="355" text="{recording.recording_notes}"/>
+		</s:FormItem>
+		<s:FormItem width="513" label="Link to Purchase">
+			<s:TextInput id="linkTextInput" width="353" text="{recording.link}"/>
+		</s:FormItem>
+		<s:FormItem label="Image Filename">
+			<s:TextInput id="imageTextInput" width="355" text="{recording.image}"/>
+		</s:FormItem>
+		<s:Button id="btnSaveRecordingEdits" label="Save Edits" click="button_clickHandler(event)"/>
+		<s:Button id="btnCancelRecordingEdit" label="cancel"
+				  click="btnCancelRecordingEdit_clickHandler(event)"/>
+		
+	</s:Form>
+	<s:DataGrid id="dgRelatedWorks" x="541" y="16" width="250" height="105"
+				creationComplete="dgRelatedWorks_creationCompleteHandler(event)"
+				requestedRowCount="4">
+		<s:columns>
+			<s:ArrayList>
+				
+				<s:GridColumn dataField="title" headerText="Related Works"></s:GridColumn>
+				
+			</s:ArrayList>
+		</s:columns>
+		<s:typicalItem>
+			<fx:Object recording="recording1" title="title1" work="work1"></fx:Object>
+		</s:typicalItem>
+		<s:AsyncListView list="{getRelatedWorksForMediaTypeResult.lastResult}"/>
+	</s:DataGrid>
+	<s:ComboBox id="cboSelectWork" x="542" y="206"
+				creationComplete="cboSelectWork_creationCompleteHandler(event)" labelField="label" width="250">
+		<s:AsyncListView list="{getAlphaListOfWorksResult.lastResult}"/>
+	</s:ComboBox>
+	<s:Button id="btnAddRelatedWork" x="542" y="249" label="Add Work To List"
+			  click="btnAddRelatedWork_clickHandler(event)"/>
+	<s:Button id="tnDeleteWorkRelationship" x="542" y="155" label="Delete Selected Related Work"
+			  click="tnDeleteWorkRelationship_clickHandler(event)"/>
+	<components:comboBox2 id="cboAlbums" x="542" y="477" width="181"
+						  creationComplete="this.getAlbumsForCBO();"
+						  dataProvider="{this.getAlbumsForCBOResult.lastResult}" labelField="label"
+						  prompt="Select Album....."/>
+	<s:DataGrid id="dgRelatedAlbums" x="542" y="311" width="250"
+				creationComplete="dgRelatedAlbums_creationCompleteHandler(event)"
+				requestedRowCount="4">
+		<s:columns>
+			<s:ArrayList>
+				<s:GridColumn dataField="albumTitle" headerText="albumTitle"></s:GridColumn>
+				<s:GridColumn dataField="trackOnAlbum" headerText="Track on Album"></s:GridColumn>
+			</s:ArrayList>
+		</s:columns>
+		<s:typicalItem>
+			<fx:Object albumID="albumID1" albumTitle="albumTitle1" recordingID="recordingID1"></fx:Object>
+		</s:typicalItem>
+		<s:AsyncListView list="{getAlbumsForRecordingResult.lastResult}"/>
+		
+	</s:DataGrid>
+	<components:comboBox2 id="cboTrackNumbers" x="731" y="477" width="61" creationComplete="comboBox_creationCompleteHandler(event);"
+						   dataProvider="{this.getTrackNumbersResult.lastResult}" labelField="label"/>
+	<s:Button id="btnAssociateTrackWithAlbum" x="542" y="515" label="Save Album/Track Link"
+			  click="btnAssociateTrackWithAlbum_clickHandler(event)"/>
+	<s:Label x="542" y="457" text="Album Name"/>
+	<s:Label x="738" y="457" text="Track #"/>
+	
+</s:Group>

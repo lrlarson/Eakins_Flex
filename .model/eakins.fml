@@ -1,0 +1,736 @@
+
+<model xmlns="http://ns.adobe.com/Fiber/1.0">
+  <annotation name="ActionScriptGeneration">
+    <item name="FullyQualifyReferences">true</item>
+  </annotation>
+  <entity name="Categories">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">Categories</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">EakinsData</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="getCategories">
+      <item name="propertySpecifier">data,label,slug</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="data" type="integer" required="true"/>
+    <property name="label" type="string" required="true"/>
+    <property name="slug" type="string" required="true"/>
+  </entity>
+  <service name="EakinsData">
+    <annotation name="ActionScriptGeneration">
+      <item name="Source">eakins.data.eakinsData</item>
+      <item name="ServiceType">RemoteObject</item>
+      <item name="Package">services.eakinsdata</item>
+      <item name="Endpoint">http://localhost:8500/flex2gateway/</item>
+      <item name="Destination">ColdFusion</item>
+    </annotation>
+    <annotation name="ServiceTypeGroup">
+      <item name="ServiceBackendType">ColdFusion</item>
+    </annotation>
+    <annotation name="ServiceConfig">
+      <item name="DEFAULT_ENTITY_PACKAGE">valueObjects</item>
+      <item name="COLDFUSION_SERVER_ROOT_URL">http://localhost:8500/</item>
+      <item name="LINKED_FILE">eakinsData.cfc</item>
+      <item name="COLDFUSION_SERVER_CONTEXT_ROOT"></item>
+      <item name="CFC_CLASS_NAME">eakinsData</item>
+      <item name="CFC_RELATIVE_LOCATION">eakins/data/eakinsData.cfc</item>
+      <item name="ABSOLUTE_ENDPOINT">http://localhost:8500/flex2gateway/</item>
+      <item name="CFC_LOCATION">/Applications/ColdFusion9/wwwroot/eakins/data/eakinsData.cfc</item>
+    </annotation>
+    <function name="init" return-type="opaque">
+      <annotation name="analyze group">
+        <item name="analyzed">false</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="returnType">opaque</item>
+      </annotation>
+    </function>
+    <function name="getAllBooks" return-type="BooksRaw[]">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="ValidProperties">
+        <item name="propertySpecifier">id,title</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="returnType">opaque</item>
+      </annotation>
+    </function>
+    <function name="getBookDetails" return-type="BookDetails[]">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="ValidProperties">
+        <item name="propertySpecifier">credits,thumbnail_content_type,thumbnail_file_size,id,title,long_description,thumbnail_file_name,colophon,short_description,subtitle,year,slug,specs</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">float</item>
+        <item name="returnType">opaque</item>
+      </annotation>
+      <parameter name="id" type="float"/>
+    </function>
+    <function name="getCategoriesForBook" return-type="CategoriesForBook[]">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="ValidProperties">
+        <item name="propertySpecifier">name,book_id,category_id</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">float</item>
+        <item name="returnType">opaque</item>
+      </annotation>
+      <parameter name="id" type="float"/>
+    </function>
+    <function name="getCategories" return-type="CategoriesForBook[]">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="ValidProperties">
+        <item name="propertySpecifier">data,label,slug</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="returnType">opaque</item>
+      </annotation>
+    </function>
+    <function name="newCatForBook" return-type="integer">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">float,float</item>
+        <item name="returnType">opaque</item>
+      </annotation>
+      <parameter name="book_id" type="float"/>
+      <parameter name="category_id" type="float"/>
+    </function>
+    <function name="deleteCatFromBook" return-type="integer">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">float,float</item>
+        <item name="returnType">opaque</item>
+      </annotation>
+      <parameter name="book_id" type="float"/>
+      <parameter name="category_id" type="float"/>
+    </function>
+    <function name="updateBook" return-type="integer">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">opaque</item>
+        <item name="returnType">opaque</item>
+      </annotation>
+      <parameter name="bookDetails" type="BookDetails"/>
+    </function>
+    <function name="getEditionsForBook" return-type="Editions[]">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="ValidProperties">
+        <item name="propertySpecifier">id,price,weight,book_id,isbn,format,out_of_print,not_for_sale</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">float</item>
+        <item name="returnType">opaque</item>
+      </annotation>
+      <parameter name="book_id" type="float"/>
+    </function>
+    <function name="getEditionsDetails" return-type="EditionDetails[]">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="ValidProperties">
+        <item name="propertySpecifier">id,price,weight,book_id,isbn,format,out_of_print,not_for_sale</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">float</item>
+        <item name="returnType">opaque</item>
+      </annotation>
+      <parameter name="edition_ID" type="float"/>
+    </function>
+    <function name="updateEdition" return-type="integer">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">opaque</item>
+        <item name="returnType">opaque</item>
+      </annotation>
+      <parameter name="editionDetails" type="EditionDetails"/>
+    </function>
+    <function name="createNewEdition" return-type="integer">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">opaque</item>
+        <item name="returnType">opaque</item>
+      </annotation>
+      <parameter name="editionDetails" type="EditionDetails"/>
+    </function>
+    <function name="getAssetsForBook" return-type="BookAssets[]">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="ValidProperties">
+        <item name="propertySpecifier">id,position,book_id,asset_file_name,asset_content_type</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">float</item>
+        <item name="returnType">opaque</item>
+      </annotation>
+      <parameter name="book_id" type="float"/>
+    </function>
+    <function name="saveAssetChanges" return-type="integer">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">opaque</item>
+        <item name="returnType">opaque</item>
+      </annotation>
+      <parameter name="asset" type="BookAssets"/>
+    </function>
+    <function name="createNewAsset" return-type="integer">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">opaque</item>
+        <item name="returnType">opaque</item>
+      </annotation>
+      <parameter name="asset" type="BookAssets"/>
+    </function>
+    <function name="deleteAsset" return-type="integer">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">float</item>
+        <item name="returnType">opaque</item>
+      </annotation>
+      <parameter name="id" type="float"/>
+    </function>
+    <function name="getRelatedClasses" return-type="RelatedClasses[]">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="ValidProperties">
+        <item name="propertySpecifier">data,label</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="returnType">opaque</item>
+      </annotation>
+    </function>
+    <function name="getRelatedItemsForBook" return-type="RelatedItems[]">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="ValidProperties">
+        <item name="propertySpecifier">id,content,relatedClass,title,itemClass,book_id</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">float</item>
+        <item name="returnType">opaque</item>
+      </annotation>
+      <parameter name="book_ID" type="float"/>
+    </function>
+    <function name="getRelatedDetails" return-type="RelatedItemDetails[]">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="ValidProperties">
+        <item name="propertySpecifier">id,content,title,book_id,relatedItemClass</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">float</item>
+        <item name="returnType">opaque</item>
+      </annotation>
+      <parameter name="id" type="float"/>
+    </function>
+    <function name="updateRelatedItem" return-type="integer">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">opaque</item>
+        <item name="returnType">opaque</item>
+      </annotation>
+      <parameter name="relatedItem" type="RelatedItems"/>
+    </function>
+    <function name="insertNewRelatedItem" return-type="integer">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">opaque</item>
+        <item name="returnType">opaque</item>
+      </annotation>
+      <parameter name="newItem" type="RelatedItems"/>
+    </function>
+    <function name="deleteRelatedItem" return-type="integer">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">opaque</item>
+        <item name="returnType">opaque</item>
+      </annotation>
+      <parameter name="id" type="integer"/>
+    </function>
+    <function name="createNewBook" return-type="integer">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">opaque</item>
+        <item name="returnType">opaque</item>
+      </annotation>
+      <parameter name="newBook" type="BookDetails"/>
+    </function>
+    <function name="getBooksByClass" return-type="opaque">
+      <annotation name="analyze group">
+        <item name="analyzed">false</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">float</item>
+        <item name="returnType">opaque</item>
+      </annotation>
+      <parameter name="bookClass" type="float"/>
+    </function>
+    <function name="getNewPhotoAssetsForBook" return-type="NewPhotoAssets[]">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="ValidProperties">
+        <item name="propertySpecifier">id,position,fileName,bookID,photoTypeName,assetPhotoType</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">float</item>
+        <item name="returnType">opaque</item>
+      </annotation>
+      <parameter name="book_ID" type="float"/>
+    </function>
+    <function name="getNewPhotoTypes" return-type="PhotoTypes[]">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="ValidProperties">
+        <item name="propertySpecifier">data,label</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="returnType">opaque</item>
+      </annotation>
+    </function>
+    <function name="saveNewPhotoTypeChanges" return-type="integer">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">opaque</item>
+        <item name="returnType">opaque</item>
+      </annotation>
+      <parameter name="newPhoto" type="NewPhotoAssets"/>
+    </function>
+    <function name="createNewPhotoAsset" return-type="integer">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">opaque</item>
+        <item name="returnType">opaque</item>
+      </annotation>
+      <parameter name="newPhotoType" type="NewPhotoAssets"/>
+    </function>
+    <function name="deleteNewPhotoAsset" return-type="integer">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">float</item>
+        <item name="returnType">opaque</item>
+      </annotation>
+      <parameter name="id" type="float"/>
+    </function>
+    <function name="getAvailableHomePageFeatures" return-type="AvailableHeroImages[]">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="ValidProperties">
+        <item name="propertySpecifier">id,title,photoID,fileName,assetPhotoType</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="returnType">opaque</item>
+      </annotation>
+    </function>
+    <function name="insertHeroImage" return-type="opaque">
+      <annotation name="analyze group">
+        <item name="analyzed">false</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">opaque</item>
+        <item name="returnType">opaque</item>
+      </annotation>
+      <parameter name="heroImage" type="HeroImage"/>
+    </function>
+    <function name="getHeroImages" return-type="HeroImage[]">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="ValidProperties">
+        <item name="propertySpecifier">id,position,title,photoID</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="returnType">opaque</item>
+      </annotation>
+    </function>
+    <function name="deleteFromHeroes" return-type="integer">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">opaque</item>
+        <item name="returnType">opaque</item>
+      </annotation>
+      <parameter name="photoID" type="integer"/>
+    </function>
+    <function name="getNewsForBook" return-type="OldNews[]">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="ValidProperties">
+        <item name="propertySpecifier">id,news</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">float</item>
+        <item name="returnType">opaque</item>
+      </annotation>
+      <parameter name="bookID" type="float"/>
+    </function>
+  </service>
+  <entity name="RelatedItems">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">RelatedItems</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">EakinsData,EakinsDataDummy</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="getRelatedItemsForBook">
+      <item name="propertySpecifier">id,content,relatedClass,title,itemClass,book_id</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="id" type="integer" required="true"/>
+    <property name="content" type="string" required="true"/>
+    <property name="relatedClass" type="string" required="true"/>
+    <property name="title" type="string" required="true"/>
+    <property name="itemClass" type="integer" required="true"/>
+    <property name="book_id" type="integer" required="true"/>
+  </entity>
+  <entity name="RelatedItemDetails">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">RelatedItemDetails</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">EakinsData,EakinsDataDummy</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="getRelatedDetails">
+      <item name="propertySpecifier">id,content,title,book_id,relatedItemClass</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="id" type="integer" required="true"/>
+    <property name="content" type="string" required="true"/>
+    <property name="title" type="string" required="true"/>
+    <property name="book_id" type="integer" required="true"/>
+    <property name="relatedItemClass" type="integer" required="true"/>
+  </entity>
+  <entity name="NewPhotoAssets">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">NewPhotoAssets</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">EakinsData,EakinsDataDummy</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="getNewPhotoAssetsForBook">
+      <item name="propertySpecifier">id,position,fileName,bookID,photoTypeName,assetPhotoType</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="id" type="integer" required="true"/>
+    <property name="position" type="integer" required="true"/>
+    <property name="fileName" type="string" required="true"/>
+    <property name="bookID" type="integer" required="true"/>
+    <property name="photoTypeName" type="string" required="true"/>
+    <property name="assetPhotoType" type="integer" required="true"/>
+  </entity>
+  <entity name="AvailableHeroImages">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">AvailableHeroImages</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">EakinsData</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="getAvailableHomePageFeatures">
+      <item name="propertySpecifier">id,title,photoID,fileName,assetPhotoType</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="id" type="integer" required="true"/>
+    <property name="title" type="string" required="true"/>
+    <property name="photoID" type="integer" required="true"/>
+    <property name="fileName" type="string" required="true"/>
+    <property name="assetPhotoType" type="string" required="true"/>
+  </entity>
+  <entity name="BookAssets">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">BookAssets</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">EakinsData,EakinsDataDummy</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="getAssetsForBook">
+      <item name="propertySpecifier">id,position,book_id,asset_file_name,asset_content_type</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="id" type="integer" required="true"/>
+    <property name="position" type="integer" required="true"/>
+    <property name="book_id" type="integer" required="true"/>
+    <property name="asset_file_name" type="string" required="true"/>
+    <property name="asset_content_type" type="string" required="true"/>
+  </entity>
+  <entity name="HeroImage">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">HeroImage</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">EakinsData</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="getHeroImages">
+      <item name="propertySpecifier">id,position,title,photoID</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="id" type="integer" required="true"/>
+    <property name="position" type="integer" required="true"/>
+    <property name="title" type="string" required="true"/>
+    <property name="photoID" type="integer" required="true"/>
+  </entity>
+  <entity name="BookDetails">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">BookDetails</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">EakinsData,EakinsDataDummy</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="getBookDetails">
+      <item name="propertySpecifier">credits,thumbnail_content_type,thumbnail_file_size,id,title,long_description,thumbnail_file_name,colophon,short_description,subtitle,year,slug,specs</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="credits" type="string" required="true"/>
+    <property name="thumbnail_content_type" type="string" required="true"/>
+    <property name="thumbnail_file_size" type="integer" required="true"/>
+    <property name="id" type="integer" required="true"/>
+    <property name="title" type="string" required="true"/>
+    <property name="long_description" type="string" required="true"/>
+    <property name="thumbnail_file_name" type="string" required="true"/>
+    <property name="colophon" type="string" required="true"/>
+    <property name="short_description" type="string" required="true"/>
+    <property name="subtitle" type="string" required="true"/>
+    <property name="year" type="integer" required="true"/>
+    <property name="slug" type="string" required="true"/>
+    <property name="specs" type="string" required="true"/>
+  </entity>
+  <entity name="PhotoTypes">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">PhotoTypes</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">EakinsData</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="getNewPhotoTypes">
+      <item name="propertySpecifier">data,label</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="data" type="integer" required="true"/>
+    <property name="label" type="string" required="true"/>
+  </entity>
+  <entity name="CategoriesForBook">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">CategoriesForBook</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">EakinsData</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="getCategoriesForBook">
+      <item name="propertySpecifier">name,book_id,category_id</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <annotation name="getCategories">
+      <item name="propertySpecifier">data,label,slug</item>
+    </annotation>
+    <property name="data" type="integer" required="true"/>
+    <property name="label" type="string" required="true"/>
+    <property name="slug" type="string" required="true"/>
+    <property name="name" type="string" required="true"/>
+    <property name="book_id" type="integer" required="true"/>
+    <property name="category_id" type="integer" required="true"/>
+  </entity>
+  <entity name="Editions">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">Editions</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">EakinsData</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="getEditionsForBook">
+      <item name="propertySpecifier">id,price,weight,book_id,isbn,format,out_of_print,not_for_sale</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="id" type="integer" required="true"/>
+    <property name="price" type="string" required="true"/>
+    <property name="weight" type="string" required="true"/>
+    <property name="book_id" type="integer" required="true"/>
+    <property name="isbn" type="string" required="true"/>
+    <property name="format" type="string" required="true"/>
+    <property name="out_of_print" type="integer" required="true"/>
+    <property name="not_for_sale" type="integer" required="true"/>
+  </entity>
+  <entity name="RelatedClasses">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">RelatedClasses</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">EakinsData</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="getRelatedClasses">
+      <item name="propertySpecifier">data,label</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="data" type="integer" required="true"/>
+    <property name="label" type="string" required="true"/>
+  </entity>
+  <entity name="OldNews">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">OldNews</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">EakinsData</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="getNewsForBook">
+      <item name="propertySpecifier">id,news</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="id" type="integer" required="true"/>
+    <property name="news" type="string" required="true"/>
+  </entity>
+  <entity name="BooksRaw">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">BooksRaw</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">EakinsData,EakinsDataDummy</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="getAllBooks">
+      <item name="propertySpecifier">id,title</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="id" type="integer" required="true"/>
+    <property name="title" type="string" required="true"/>
+  </entity>
+  <entity name="EditionDetails">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">EditionDetails</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">EakinsData,EakinsDataDummy</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="getEditionsDetails">
+      <item name="propertySpecifier">id,price,weight,book_id,isbn,format,out_of_print,not_for_sale</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="id" type="integer" required="true"/>
+    <property name="price" type="string" required="true"/>
+    <property name="weight" type="string" required="true"/>
+    <property name="book_id" type="integer" required="true"/>
+    <property name="isbn" type="string" required="true"/>
+    <property name="format" type="string" required="true"/>
+    <property name="out_of_print" type="integer" required="true"/>
+    <property name="not_for_sale" type="integer" required="true"/>
+  </entity>
+</model>

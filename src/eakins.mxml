@@ -1,0 +1,1081 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:WindowedApplication xmlns:fx="http://ns.adobe.com/mxml/2009"
+					   xmlns:s="library://ns.adobe.com/flex/spark"
+					   xmlns:mx="library://ns.adobe.com/flex/mx"
+					   xmlns:eakinsdata="services.eakinsdata.*"
+					   xmlns:valueObjects="valueObjects.*"
+					   xmlns:components="components.*"
+					   width="1000" height="700"
+					   width.editBook="1200" height.editBook="900" creationComplete="init()">
+	<fx:Script>
+		<![CDATA[
+			import flash.utils.Timer;
+			
+			import mx.controls.Alert;
+			import mx.events.FlexEvent;
+			import mx.rpc.events.ResultEvent;
+			
+			import valueObjects.BookAssets;
+			import valueObjects.EditionDetails;
+			import valueObjects.HeroImage;
+			import valueObjects.NewPhotoAssets;
+			import valueObjects.RelatedItemDetails;
+			import valueObjects.RelatedItems;
+			
+			public var currentBookID:int;
+			
+			public var currentRelatedItem:int;
+			
+			//file upload
+			private var fileRef:FileReference;
+			private var fileUploadString:String;
+			
+			protected function init():void{
+				fileRef = new FileReference(); 
+				fileRef.addEventListener(Event.SELECT, fileRef_select);
+				fileRef.addEventListener(ProgressEvent.PROGRESS, fileRef_progress); 
+				fileRef.addEventListener(Event.COMPLETE, fileRef_complete); 
+			}
+			
+			private function browseAndUpload():void {
+				this.fileUploadString = 'http://www.eakinspress.com/images/portraits/upload.cfm';
+				fileRef.browse(); 
+				message.text = ""; 
+			}
+			
+			private function uploadHero():void {
+				this.fileUploadString = 'http://www.eakinspress.com/images/heroes/uploadHeroes.cfm';
+				fileRef.browse(); 
+				message.text = ""; 
+			}
+			
+			private function uploadSpread():void {
+				this.fileUploadString = 'http://www.eakinspress.com/images/publications/uploadSpreads.cfm';
+				fileRef.browse(); 
+				message.text = ""; 
+			}
+			private function fileRef_select(evt:Event):void { 
+				try { 
+					message.text = "Uploading -- file size in bytes: " + numberFormatter.format(fileRef.size); 
+					fileRef.upload(new URLRequest(fileUploadString)); }
+					catch (err:Error) { message.text = "ERROR: zero-byte file";
+					} 
+			}
+			
+			private function fileRef_progress(evt:ProgressEvent):void { 
+				progressBar.visible = true; 
+			} 
+			private function fileRef_complete(evt:Event):void { 
+				var myTimer:Timer = new Timer(200,1);
+				myTimer.start();
+				myTimer.addEventListener(TimerEvent.TIMER_COMPLETE,onCompleteUpload);
+				
+				message.text += " -- The file has been successfully uploaded"; 
+				//progressBar.visible = false; 
+			}
+			
+			private function onCompleteUpload(e:Event):void{
+				progressBar.visible = false; 
+			}
+			
+			protected function dataGrid_creationCompleteHandler(event:FlexEvent):void
+			{
+				getAllBooksResult.token = eakinsData.getAllBooks();
+				
+				
+				
+				getAvailableHomePageFeaturesResult.token = eakinsData.getAvailableHomePageFeatures();
+				getHeroImagesResult.token = eakinsData.getHeroImages();
+				getHeroImagesResult2.token = eakinsData.getHeroImages();
+			}
+			
+			
+			
+			
+			protected function button_clickHandler(event:MouseEvent):void
+			{
+				bookDetails.title = titleTextInput.text;
+				bookDetails.subtitle = subtitleTextInput.text;
+				bookDetails.long_description = long_descriptionTextInput.text;
+				bookDetails.short_description = short_descriptionTextInput.text;
+				bookDetails.credits = creditsTextInput.text;
+				bookDetails.colophon = colophonTextInput.text;
+				bookDetails.year = parseInt(yearTextInput.text);
+				bookDetails.specs = specsTextInput.text;
+				bookDetails.thumbnail_file_name = thumbnail_file_nameTextInput.text;
+				bookDetails.thumbnail_content_type = thumbnail_content_typeTextInput.text;
+				bookDetails.slug = this.slug_txt.text;
+				bookDetails.id = this.currentBookID;
+				this.updateBook(bookDetails);
+				this.newBookCreated();
+				this.btnSaveNewBook.visible = false;
+				this.getNewPhotoTypes();
+			}
+			
+			protected function clearForm():void{
+				titleTextInput.text = '';
+				subtitleTextInput.text = '';
+				long_descriptionTextInput.text = '';
+				short_descriptionTextInput.text = '';
+				creditsTextInput.text = '';
+				colophonTextInput.text = '';
+				yearTextInput.text = '';
+				specsTextInput.text = '';
+				thumbnail_file_nameTextInput.text = '';
+				thumbnail_content_typeTextInput.text '';
+				this.slug_txt.text = '';
+				
+			}
+			
+			protected function dgBookList_doubleClickHandler(event:MouseEvent):void
+			{
+				this.currentBookID = this.dgBookList.selectedItem.id;
+				getBookDetailsResult.token = eakinsData.getBookDetails(this.dgBookList.selectedItem.id);
+				getCategoriesForBookResult.token = eakinsData.getCategoriesForBook(this.dgBookList.selectedItem.id);
+				getEditionsForBookResult.token = eakinsData.getEditionsForBook(this.dgBookList.selectedItem.id);
+				//getAssetsForBookResult.token = eakinsData.getAssetsForBook(this.dgBookList.selectedItem.id);
+				getNewPhotoAssetsForBookResult.token = eakinsData.getNewPhotoAssetsForBook(this.dgBookList.selectedItem.id);
+				this.getNewPhotoTypes();
+				
+				
+				this.currentState = "editBook";
+				this.newBookCreated();
+				this.btnSaveNewBook.visible = false;
+				this.clearPhotoAssets();
+				this.clearEditionData();
+				
+				
+			}
+			
+			protected function clearEditionData():void{
+				
+				this.txtPrice.text = '';
+				this.txtISBM.text = '';
+				this.txtFormat.text = '';
+				this.txtWeight.text = '';
+				this.txtForSale.text = '';
+				this.txtInPrint.text = '';
+			}
+			
+			protected function btnCancel_clickHandler(event:MouseEvent):void
+			{
+				this.currentState = "";
+				
+			}
+			
+			
+			protected function cboCategories_creationCompleteHandler(event:FlexEvent):void
+			{
+				getCategoriesResult.token = eakinsData.getCategories();
+			}
+			
+			protected function newCatForBookResult_resultHandler(event:ResultEvent):void
+			{
+				getCategoriesForBookResult.token = eakinsData.getCategoriesForBook(this.dgBookList.selectedItem.id);
+				
+			}
+			
+			
+			protected function btnAddCatToBook_clickHandler(event:MouseEvent):void
+			{
+				newCatForBookResult.token = eakinsData.newCatForBook(this.currentBookID, this.cboCategories.selectedItem.data);
+				
+				
+			}
+			
+			protected function newCatForBook(book_id:Number, category_id:Number):void
+			{
+				newCatForBookResult.token = eakinsData.newCatForBook(this.currentBookID, this.cboCategories.selectedItem.data);
+			}
+			
+			protected function deleteCatFromBook():void{
+				
+				deleteCatFromBookResult.token = this.eakinsData.deleteCatFromBook(this.currentBookID,this.dgCatsForBook.selectedItem.category_id);
+			}
+			
+			
+			
+			protected function deleteCatFromBookResult_resultHandler(event:ResultEvent):void
+			{
+				getCategoriesForBookResult.token = eakinsData.getCategoriesForBook(this.dgBookList.selectedItem.id);
+				
+			}
+			
+			protected function dgDeleteCat_clickHandler(event:MouseEvent):void
+			{
+				deleteCatFromBookResult.token = this.eakinsData.deleteCatFromBook(this.currentBookID,this.dgCatsForBook.selectedItem.category_id);
+			}
+			
+			
+			protected function updateBook(bookDetails:BookDetails):void
+			{
+				updateBookResult.token = eakinsData.updateBook(bookDetails);
+			}
+			
+			
+			
+			
+			
+			protected function getEditionsForBook(book_id:Number):void
+			{
+				getEditionsForBookResult2.token = eakinsData.getEditionsForBook(book_id);
+			}
+			
+			
+			protected function getEditionsDetails(edition_ID:Number):void
+			{
+				getEditionsDetailsResult.token = eakinsData.getEditionsDetails(edition_ID);
+			}
+			
+			protected function getEditionsDetailsResult_resultHandler(event:ResultEvent):void
+			{
+				this.txtFormat.text = event.result[0].format;
+				this.txtISBM.text = event.result[0].isbn;
+				this.txtPrice.text = event.result[0].price;
+				this.txtWeight.text = event.result[0].weight;
+				this.txtInPrint.text = event.result[0].out_of_print;
+				this.txtForSale.text = event.result[0].not_for_sale;
+				this.btnSaveEditionChanges.visible = true;
+				
+			}
+			
+			
+			protected function btnSaveEditionChanges_clickHandler(event:MouseEvent):void
+			{
+				var newEditionDetails:EditionDetails = new EditionDetails;
+				newEditionDetails.format = this.txtFormat.text;
+				newEditionDetails.isbn = this.txtISBM.text;
+				newEditionDetails.not_for_sale = int(this.txtForSale.text);
+				newEditionDetails.out_of_print = int(this.txtInPrint.text);
+				newEditionDetails.price = this.txtPrice.text;
+				newEditionDetails.weight = this.txtWeight.text;
+				newEditionDetails.id = this.dgEditions.selectedItem.id;
+				updateEditionResult.token = eakinsData.updateEdition(newEditionDetails);
+			}
+			
+			protected function updateEditionResult_resultHandler(event:ResultEvent):void
+			{	
+				getEditionsForBookResult.token = eakinsData.getEditionsForBook(this.currentBookID);
+				this.clearEditionDetails();
+			}
+			
+			protected function clearEditionDetails():void{
+				this.txtFormat.text = '';
+				this.txtISBM.text = '';
+				this.txtForSale.text = '';
+				this.txtInPrint.text = '';;
+				this.txtPrice.text = '';
+				this.txtWeight.text = '';
+				this.btnSaveEditionChanges.visible = false;
+				this.btnSaveNewEdition.visible = false;
+				
+			}
+			
+			protected function btnCreateNewEdition_clickHandler(event:MouseEvent):void
+			{
+				this.clearEditionDetails();
+				this.btnSaveEditionChanges.visible = false;
+				this.btnSaveNewEdition.visible = true;
+			}
+			
+			
+			protected function btnSaveNewEdition_clickHandler(event:MouseEvent):void
+			{
+				var newEditionDetails:EditionDetails = new EditionDetails;
+				newEditionDetails.format = this.txtFormat.text;
+				newEditionDetails.isbn = this.txtISBM.text;
+				newEditionDetails.not_for_sale = int(this.txtForSale.text);
+				newEditionDetails.out_of_print = int(this.txtInPrint.text);
+				newEditionDetails.price = this.txtPrice.text;
+				newEditionDetails.weight = this.txtWeight.text;
+				newEditionDetails.book_id = this.currentBookID;
+				createNewEditionResult.token = eakinsData.createNewEdition(newEditionDetails);
+			}
+			
+			protected function createNewEditionResult_resultHandler(event:ResultEvent):void
+			{
+				
+				this.clearEditionDetails();
+				getEditionsForBookResult.token = eakinsData.getEditionsForBook(this.currentBookID);
+			}
+			
+			
+			protected function dgAssets_creationCompleteHandler(event:FlexEvent):void
+			{
+				
+				getNewPhotoAssetsForBookResult.token = eakinsData.getNewPhotoAssetsForBook(this.currentBookID);
+			}
+			
+			
+			protected function btnSaveAssetChanges_clickHandler(event:MouseEvent):void
+			{	
+				var updatedAsset:NewPhotoAssets = new NewPhotoAssets;
+				updatedAsset.fileName = this.txtFileName.text;
+				updatedAsset.position = int(this.txtPosition.text);
+				updatedAsset.id = this.dgAssets.selectedItem.id;
+				updatedAsset.assetPhotoType = this.cboNewPhotoType.selectedItem.data;
+				//saveAssetChangesResult.token = eakinsData.saveAssetChanges(updatedAsset);
+				saveNewPhotoTypeChangesResult.token = eakinsData.saveNewPhotoTypeChanges(updatedAsset);
+			}
+			
+			protected function saveAssetChangesResult_resultHandler(event:ResultEvent):void
+			{
+				getAssetsForBookResult.token = eakinsData.getAssetsForBook(this.dgBookList.selectedItem.id);
+				clearAssets();
+			}
+			
+			protected function handleAssetDoubleClick():void{
+				this.makePhotoAssetsVisible();
+				this.btnSaveAssetChanges.visible = true;
+				this.txtFileName.text = this.dgAssets.selectedItem.fileName;
+				this.txtPosition.text = this.dgAssets.selectedItem.position;
+				//this.btnSaveAssetChanges.visible = true;
+				//this.btnDeleteAsset.visible= false;
+				this.cboNewPhotoType.selectedValue = this.dgAssets.selectedItem.assetPhotoType;
+				
+			}
+			protected function clearAssets():void{
+				this.btnSaveAssetChanges.visible = false;
+				this.btnSaveNewAsset.visible = false;
+				this.btnDeleteAsset.visible = false;
+				this.btnCreateNewAsset.visible = true;
+				this.txtFileName.text = '';
+				this.txtPosition.text = '';
+			}
+			
+			protected function btnCreateNewAsset_clickHandler(event:MouseEvent):void
+			{
+				this.txtFileName.text = '';
+				this.txtPosition.text = '';
+				this.txtFileName.visible = true;
+				this.txtPosition.visible = true;
+				this.cboNewPhotoType.visible = true;
+				this.btnSaveNewAsset.visible = true; //show save button
+				this.btnCreateNewAsset.visible = false;
+				this.btnDeleteAsset.visible = false;
+				this.btnSaveAssetChanges.visible = false;
+			}
+			
+			
+			protected function createNewAsset(asset:BookAssets):void
+			{
+				var newBookAssets:BookAssets = new BookAssets;
+				newBookAssets.asset_file_name = this.txtFileName.text;
+				newBookAssets.position = int(this.txtPosition.text);
+				
+				createNewAssetResult.token = eakinsData.createNewAsset(asset);
+			}
+			
+			protected function createNewAssetResult_resultHandler(event:ResultEvent):void
+			{
+				
+				getAssetsForBookResult.token = eakinsData.getAssetsForBook(this.dgBookList.selectedItem.id);
+				clearAssets();
+				this.btnSaveNewAsset.visible = false;
+				this.btnCreateNewAsset.visible = true;
+				
+			}
+			
+			protected function btnSaveNewAsset_clickHandler(event:MouseEvent):void
+			{
+				
+				var newBookAssets:NewPhotoAssets = new NewPhotoAssets;
+				newBookAssets.fileName = this.txtFileName.text;
+				newBookAssets.position = int(this.txtPosition.text);
+				newBookAssets.bookID = this.currentBookID;
+				newBookAssets.assetPhotoType = this.cboNewPhotoType.selectedItem.data;
+				createNewPhotoAssetResult.token = eakinsData.createNewPhotoAsset(newBookAssets);
+			}
+			
+			
+			protected function btnDeleteAsset_clickHandler(event:MouseEvent):void
+			{
+				this.deleteNewPhotoAsset(this.dgAssets.selectedItem.id);
+			}
+			
+			protected function deleteAssetResult_resultHandler(event:ResultEvent):void
+			{
+				
+				getAssetsForBookResult.token = eakinsData.getAssetsForBook(this.dgBookList.selectedItem.id);
+				this.clearAssets();
+			}
+			
+			protected function btnRelatedMaterials_clickHandler(event:MouseEvent):void
+			{
+				this.currentState = "relatedMaterials";
+				getRelatedItemsForBookResult.token = eakinsData.getRelatedItemsForBook(this.currentBookID);
+				this.clearRelatedItemForm();
+				this.getNewsForBook(this.currentBookID);
+			}
+			
+			protected function btnReturnToDetailPage_clickHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				this.currentState = "editBook";
+			}
+			
+			
+			protected function cboRelatedClasses_creationCompleteHandler(event:FlexEvent):void
+			{
+				getRelatedClassesResult.token = eakinsData.getRelatedClasses();
+			}
+			
+			
+			
+			protected function getRelatedDetails(id:Number):void
+			{
+				//getRelatedDetailsResult.token = eakinsData.getRelatedDetails(id);
+				this.txtItemTitle.text = this.dgRelatedItems.selectedItem.title;
+				this.txtContent.text = this.dgRelatedItems.selectedItem.content;
+				this.cboRelatedClassType.selectedValue = this.dgRelatedItems.selectedItem.itemClass;
+				this.currentRelatedItem = this.dgRelatedItems.selectedItem.id;
+				this.btnSaveCurrentRelatedChange.visible = true;
+				this.btnDeleteRelated.visible = true;
+				
+			}
+			
+			
+			
+			
+			protected function updateRelatedItemResult_resultHandler(event:ResultEvent):void
+			{
+				getRelatedItemsForBookResult.token = eakinsData.getRelatedItemsForBook(this.currentBookID);
+				this.clearRelatedItemForm();
+				
+			}
+			
+			protected function btnSaveCurrentRelatedChange_clickHandler(event:MouseEvent):void
+			{
+				var updateItem:RelatedItems = new RelatedItems;
+				updateItem.content = this.txtContent.text;
+				updateItem.itemClass = this.cboRelatedClassType.selectedItem.data;
+				updateItem.title = this.txtItemTitle.text;
+				updateItem.id = this.currentRelatedItem;
+				updateRelatedItemResult.token = eakinsData.updateRelatedItem(updateItem);
+				
+			}
+			
+			protected function clearRelatedItemForm():void{
+				this.txtContent.text = '';
+				this.txtItemTitle.text = '';
+				this.btnSaveCurrentRelatedChange.visible = false;
+				this.btnSaveNewRelatedItem.visible = false;
+				this.btnDeleteRelated.visible = false;
+			}
+			
+			protected function tnCreateNewRelatedItem_clickHandler(event:MouseEvent):void
+			{
+				this.btnSaveNewRelatedItem.visible = true;
+				
+			}
+			
+			
+			protected function insertNewRelatedItem(newItem:RelatedItems):void
+			{
+				insertNewRelatedItemResult.token = eakinsData.insertNewRelatedItem(newItem);
+			}
+			
+			
+			
+			protected function btnSaveNewRelatedItem_clickHandler(event:MouseEvent):void
+			{	
+				var newItem:RelatedItems = new RelatedItems;
+				newItem.book_id = this.currentBookID;
+				newItem.content = this.txtContent.text;
+				newItem.itemClass = this.cboRelatedClassType.selectedItem.data;
+				newItem.title = this.txtItemTitle.text;
+				insertNewRelatedItemResult.token = eakinsData.insertNewRelatedItem(newItem);
+				
+			}
+			
+			protected function insertNewRelatedItemResult_resultHandler(event:ResultEvent):void
+			{
+				
+				getRelatedItemsForBookResult.token = eakinsData.getRelatedItemsForBook(this.currentBookID);
+				this.clearRelatedItemForm();
+			}
+			
+			
+			protected function deleteRelatedItem(id:int):void
+			{
+				deleteRelatedItemResult.token = eakinsData.deleteRelatedItem(id);
+			}
+			
+			protected function btnDeleteRelated_clickHandler(event:MouseEvent):void
+			{
+				this.deleteRelatedItem(this.currentRelatedItem);
+			}
+			
+			protected function deleteRelatedItemResult_resultHandler(event:ResultEvent):void
+			{
+				
+				getRelatedItemsForBookResult.token = eakinsData.getRelatedItemsForBook(this.currentBookID);
+				this.clearRelatedItemForm();
+			}
+			
+			protected function btnGotoCreateNewBook_clickHandler(event:MouseEvent):void
+			{
+				
+				this.currentState = 'editBook';
+				this.clearForm();
+				this.newBookNotCreated();
+				this.btnSaveNewBook.visible = true;
+			}
+			
+			protected function btnCreateNew_clickHandler(event:MouseEvent):void
+			{
+				this.clearForm();
+				this.btnSaveNewBook.visible = true;
+				this.newBookNotCreated();
+				
+				
+			}
+			
+			
+			protected function createNewBook(newBook:BookDetails):void
+			{
+				createNewBookResult.token = eakinsData.createNewBook(newBook);
+			}
+			
+			protected function btnSaveNewBook_clickHandler(event:MouseEvent):void
+			{
+				
+				var newBook:BookDetails = new BookDetails;
+				newBook.colophon = this.colophonTextInput.text;
+				newBook.credits = this.creditsTextInput.text;
+				newBook.long_description = this.long_descriptionTextInput.text;
+				newBook.short_description = this.short_descriptionTextInput.text;
+				newBook.slug = this.slug_txt.text;
+				newBook.specs = this.specsTextInput.text;
+				newBook.subtitle = this.subtitleTextInput.text;
+				newBook.thumbnail_file_name = this.thumbnail_content_typeTextInput.text;
+				newBook.title = this.titleTextInput.text;
+				newBook.year = int(this.yearTextInput.text);
+				this.createNewBook(newBook);
+			}
+			
+			protected function createNewBookResult_resultHandler(event:ResultEvent):void
+			{
+				//this.currentState = 'State1';
+				getAllBooksResult.token = eakinsData.getAllBooks();
+				this.newBookCreated();
+				this.btnSaveNewBook.visible = false;
+			}
+			
+			protected function newBookNotCreated():void{
+				this.dgCatsForBook.visible = false;
+				this.dgDeleteCat.visible = false;
+				this.btnAddCatToBook.visible = false;
+				this.dgEditions.visible = false;
+				this.btnCreateNewEdition.visible = false;
+				this.dgAssets.visible = false;
+				this.btnCreateNewAsset.visible = false;
+				this.btnRelatedMaterials.visible = false;
+				this.btnSaveEdits.visible = false;
+				this.btnCreateNew.visible = false;
+				this.lblCats.visible = false;
+				this.cboCategories.visible = false;
+				this.btnAddCatToBook.visible = false;
+				this.lblPrice.visible = false;
+				this.txtPrice.visible = false;
+				this.lblISBN.visible = false;
+				this.txtISBM.visible = false;
+				this.lblFormat.visible = false;
+				this.txtFormat.visible = false;
+				this.lblWeight.visible = false;
+				this.txtWeight.visible = false;
+				this.lblForSale.visible = false;
+				this.txtForSale.visible = false;
+				this.lblAssets.visible = false;
+				this.lblEditions.visible = false;
+				this.lblPosition.visible = false;
+				this.txtPosition.visible = false;
+				this.lblInPrint.visible = false;
+				this.txtInPrint.visible = false;
+				this.lblFileName.visible = false;
+				this.txtFileName.visible = false;
+				
+			}
+			protected function newBookCreated():void{
+				this.dgCatsForBook.visible = true;
+				this.dgDeleteCat.visible = true;
+				this.btnAddCatToBook.visible = true;
+				this.dgEditions.visible = true;
+				this.btnCreateNewEdition.visible = true;
+				this.dgAssets.visible = true;
+				this.btnCreateNewAsset.visible = true;
+				this.btnRelatedMaterials.visible = true;
+				this.btnSaveEdits.visible = true;
+				this.btnCreateNew.visible = true;
+				this.lblCats.visible = true;
+				this.cboCategories.visible = true;
+				this.btnAddCatToBook.visible = true;
+				this.lblPrice.visible = true;
+				this.txtPrice.visible = true;
+				this.lblISBN.visible = true;
+				this.txtISBM.visible = true;
+				this.lblFormat.visible = true;
+				this.txtFormat.visible = true;
+				this.lblWeight.visible = true;
+				this.txtWeight.visible = true;
+				this.lblForSale.visible = true;
+				this.txtForSale.visible = true;
+				this.lblAssets.visible = true;
+				this.lblEditions.visible = true;
+				this.lblPosition.visible = true;
+				this.txtPosition.visible = true;
+				this.lblInPrint.visible = true;
+				this.txtInPrint.visible = true;
+				this.lblFileName.visible = true;
+				this.txtFileName.visible = true;
+				
+			}
+			
+			protected function btnReturnToTop_clickHandler(event:MouseEvent):void
+			{
+				this.clearRelatedItemForm();
+				this.currentState = 'State1';
+				
+			}
+			
+			protected function updateBookResult_resultHandler(event:ResultEvent):void
+			{
+				// TODO Auto-generated method stub
+				this.btnSaveEdits.visible = false;
+				this.currentState = 'State1';
+				getAllBooksResult.token = eakinsData.getAllBooks();
+			}
+			
+			
+			protected function getNewPhotoTypes():void
+			{
+				getNewPhotoTypesResult.token = eakinsData.getNewPhotoTypes();
+			}
+			
+			protected function clearPhotoAssets():void{
+				this.lblFileName.visible = false;
+				this.txtFileName.visible = false;
+				this.lblPosition.visible = false;
+				this.txtPosition.visible = false;
+				this.cboNewPhotoType.visible = false;
+				this.btnSaveAssetChanges.visible = false;
+				this.btnCreateNewAsset.visible = true;
+				this.btnDeleteAsset.visible = false;
+				this.btnSaveNewAsset.visible = false;
+			}
+			
+			protected function makePhotoAssetsVisible():void{
+				this.lblFileName.visible = true;
+				this.txtFileName.visible = true;
+				this.lblPosition.visible = true;
+				this.txtPosition.visible = true;
+				this.cboNewPhotoType.visible = true;
+				this.btnSaveAssetChanges.visible = true;
+				
+				this.btnDeleteAsset.visible = true;
+				this.btnCreateNewAsset.visible = false;
+				
+			}
+			
+			protected function saveNewPhotoTypeChangesResult_resultHandler(event:ResultEvent):void
+			{
+				getNewPhotoAssetsForBookResult.token = eakinsData.getNewPhotoAssetsForBook(this.dgBookList.selectedItem.id);
+				this.txtFileName.text = '';
+				this.txtPosition.text = '';
+				this.clearPhotoAssets();
+				
+				
+			}
+			
+			protected function createNewPhotoAssetResult_resultHandler(event:ResultEvent):void
+			{
+				
+				this.clearPhotoAssets();
+				getNewPhotoAssetsForBookResult.token = eakinsData.getNewPhotoAssetsForBook(this.dgBookList.selectedItem.id);
+			}
+			
+			
+			protected function deleteNewPhotoAsset(id:Number):void
+			{
+				deleteNewPhotoAssetResult.token = eakinsData.deleteNewPhotoAsset(id);
+			}
+			
+			protected function deleteNewPhotoAssetResult_resultHandler(event:ResultEvent):void
+			{
+				this.clearPhotoAssets();
+				getNewPhotoAssetsForBookResult.token = eakinsData.getNewPhotoAssetsForBook(this.dgBookList.selectedItem.id);
+				
+			}
+			
+			protected function btnSetFeatures_clickHandler(event:MouseEvent):void
+			{
+				this.currentState = "homePageFeatures";
+				
+			}
+			
+			protected function handleHeroCandidateDoubleClick():void{
+				this.txtHeroBookTitle.text = this.dgAvailableHeroes.selectedItem.title;
+			}
+			
+			
+			protected function btnDisplayHeroImage_clickHandler(event:MouseEvent):void
+			{
+				var newHero:HeroImage = new HeroImage;
+				newHero.photoID = this.dgAvailableHeroes.selectedItem.photoID;
+				newHero.position = int(this.txtHeroPosition.text);
+				insertHeroImageResult.token = eakinsData.insertHeroImage(newHero);
+			}
+			
+			protected function insertHeroImageResult_resultHandler(event:ResultEvent):void
+			{
+				getHeroImagesResult2.token = eakinsData.getHeroImages();
+					
+			}
+			
+			
+			
+			protected function btnDeleteSelectedHero_clickHandler(event:MouseEvent):void
+			{
+				deleteFromHeroesResult.token = eakinsData.deleteFromHeroes(this.dgCurrentHeroes.selectedItem.id);
+			}
+			
+			protected function deleteFromHeroesResult_resultHandler(event:ResultEvent):void
+			{
+				getHeroImagesResult2.token = eakinsData.getHeroImages();
+				
+				
+			}
+			
+			protected function button1_clickHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				this.currentState = "State1";
+			}
+			
+			
+			protected function getNewsForBook(bookID:Number):void
+			{
+				getNewsForBookResult.token = eakinsData.getNewsForBook(bookID);
+			}
+			
+			protected function getNewsForBookResult_resultHandler(event:ResultEvent):void
+			{
+				this.txtOldNews.text = event.result[0].news;
+			}
+			
+			protected function btnUploadState_clickHandler(event:MouseEvent):void
+			{
+				this.currentState = 'uploadFiles';
+				
+			}
+			
+			protected function btnReturnFromUpload_clickHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				this.currentState = 'State1';
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<s:states>
+		<s:State name="State1"/>
+		<s:State name="editBook"/>
+		<s:State name="relatedMaterials"/>
+		<s:State name="homePageFeatures"/>
+		<s:State name="uploadFiles"/>
+	</s:states>
+	<fx:Declarations>
+		<s:CallResponder id="getAllBooksResult"/>
+		<eakinsdata:EakinsData id="eakinsData"
+							   fault="Alert.show(event.fault.faultString + '\n' + event.fault.faultDetail)"
+							   showBusyCursor="true"/>
+		<valueObjects:BookDetails id="bookDetails"/>
+		<s:CallResponder id="getBookDetailsResult"
+						 result="bookDetails = getBookDetailsResult.lastResult[0] as BookDetails"/>
+		<s:CallResponder id="getCategoriesForBookResult"/>
+		<s:CallResponder id="getCategoriesResult"/>
+		<s:CallResponder id="newCatForBookResult" result="newCatForBookResult_resultHandler(event)"/>
+		<s:CallResponder id="deleteCatFromBookResult" result="deleteCatFromBookResult_resultHandler(event)"/>
+		<s:CallResponder id="updateBookResult" result="updateBookResult_resultHandler(event)"/>
+		<s:CallResponder id="updateBookResult2"/>
+		<s:CallResponder id="getEditionsForBookResult"/>
+		<s:CallResponder id="getEditionsForBookResult2"/>
+		<s:CallResponder id="getEditionsDetailsResult" result="getEditionsDetailsResult_resultHandler(event)"/>
+		<s:CallResponder id="updateEditionResult" result="updateEditionResult_resultHandler(event)"/>
+		<s:CallResponder id="createNewEditionResult" result="createNewEditionResult_resultHandler(event)"/>
+		<s:CallResponder id="getAssetsForBookResult"/>
+		<s:CallResponder id="saveAssetChangesResult" result="saveAssetChangesResult_resultHandler(event)"/>
+		<s:CallResponder id="createNewAssetResult" result="createNewAssetResult_resultHandler(event)"/>
+		<s:CallResponder id="deleteAssetResult" result="deleteAssetResult_resultHandler(event)"/>
+		<s:CallResponder id="getRelatedClassesResult"/>
+		<s:CallResponder id="getRelatedItemsForBookResult"/>
+		<s:CallResponder id="getRelatedDetailsResult"/>
+		<s:CallResponder id="updateRelatedItemResult" result="updateRelatedItemResult_resultHandler(event)"/>
+		<s:CallResponder id="insertNewRelatedItemResult" result="insertNewRelatedItemResult_resultHandler(event)"/>
+		<s:CallResponder id="deleteRelatedItemResult" result="deleteRelatedItemResult_resultHandler(event)"/>
+		<s:CallResponder id="createNewBookResult" result="createNewBookResult_resultHandler(event)"/>
+		<s:CallResponder id="getNewPhotoAssetsForBookResult"/>
+		<s:CallResponder id="getNewPhotoTypesResult"/>
+		<s:CallResponder id="saveNewPhotoTypeChangesResult" result="saveNewPhotoTypeChangesResult_resultHandler(event)"/>
+		<s:CallResponder id="createNewPhotoAssetResult" result="createNewPhotoAssetResult_resultHandler(event)"/>
+		<s:CallResponder id="deleteNewPhotoAssetResult" result="deleteNewPhotoAssetResult_resultHandler(event)"/>
+		<s:CallResponder id="getAvailableHomePageFeaturesResult"/>
+		<s:CallResponder id="getHeroImagesResult"/>
+		<s:CallResponder id="getHeroImagesResult2"/>
+		<s:CallResponder id="insertHeroImageResult" result="insertHeroImageResult_resultHandler(event)"/>
+		<s:CallResponder id="deleteFromHeroesResult" result="deleteFromHeroesResult_resultHandler(event)"/>
+		<s:CallResponder id="getNewsForBookResult" result="getNewsForBookResult_resultHandler(event)"/>
+		<mx:NumberFormatter id="numberFormatter" />
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:DataGrid id="dgBookList" includeIn="State1" x="95" y="93" width="630" height="446"
+				creationComplete="dataGrid_creationCompleteHandler(event)"
+				dataProvider="{getAllBooksResult.lastResult}" doubleClickEnabled="true" doubleClick="dgBookList_doubleClickHandler(event)">
+		<s:columns>
+			<s:ArrayList>
+				<s:GridColumn dataField="id" headerText="id" width="40"></s:GridColumn>
+				<s:GridColumn dataField="title" headerText="title"></s:GridColumn>
+			</s:ArrayList>
+		</s:columns>
+		
+	</s:DataGrid>
+	
+	<s:Form id="form" includeIn="editBook" width="762"
+			>
+		<s:FormItem width="728" label="Title">
+			<s:TextInput id="titleTextInput" width="545" text="{bookDetails.title}"/>
+		</s:FormItem>
+		<s:FormItem label="Subtitle">
+			<s:TextInput id="subtitleTextInput" width="544" text="{bookDetails.subtitle}"/>
+		</s:FormItem>
+		<s:FormItem label="Long_description">
+			<s:TextArea id="long_descriptionTextInput" width="548" height="112"
+						text="{bookDetails.long_description}"/>
+		</s:FormItem>
+		<s:FormItem label="Short_description">
+			<s:TextArea id="short_descriptionTextInput" width="546" height="39"
+						text="{bookDetails.short_description}"/>
+		</s:FormItem>
+		<s:FormItem width="711" label="Credits">
+			<s:TextArea id="creditsTextInput" width="545" height="77" text="{bookDetails.credits}"/>
+		</s:FormItem>
+		<s:FormItem width="726" label="Colophon">
+			<s:TextArea id="colophonTextInput" width="546" height="61" text="{bookDetails.colophon}"/>
+		</s:FormItem>
+		<s:FormItem width="409" label="Year">
+			<s:TextInput id="yearTextInput" text="{bookDetails.year}"/>
+		</s:FormItem>
+		<s:FormItem width="720" label="Specs">
+			<s:TextArea id="specsTextInput" width="552" height="63" text="{bookDetails.specs}"/>
+		</s:FormItem>
+		<s:FormItem label="Thumbnail_file_name" visible="false">
+			<s:TextInput id="thumbnail_file_nameTextInput" width="552"
+						 text="{bookDetails.thumbnail_file_name}"/>
+		</s:FormItem>
+		<s:FormItem label="Thumbnail_content_type" visible="false">
+			<s:TextInput id="thumbnail_content_typeTextInput" width="192"
+						 text="{bookDetails.thumbnail_content_type}"/>
+		</s:FormItem>
+		<s:FormItem label="Slug">
+			<s:TextInput id="slug_txt" width="555"
+						 text="{bookDetails.slug}"/>
+		</s:FormItem>
+	</s:Form>
+	<s:Button id="btnCancel" includeIn="editBook" x="12" y="804" label="Cancel and Return"
+			  click="btnCancel_clickHandler(event)"/>
+	<s:DataGrid id="dgCatsForBook" includeIn="editBook" x="797" y="16" width="140" height="83"
+				creationComplete="dataGrid_creationCompleteHandler(event)" requestedRowCount="4">
+		<s:columns>
+			<s:ArrayList>
+				<s:GridColumn dataField="name" headerText="Categories"></s:GridColumn>
+				
+			</s:ArrayList>
+		</s:columns>
+		<s:typicalItem>
+			<fx:Object name="name1"></fx:Object>
+		</s:typicalItem>
+		<s:AsyncListView list="{getCategoriesForBookResult.lastResult}"/>
+	</s:DataGrid>
+	<s:ComboBox id="cboCategories" includeIn="editBook" x="960" y="35" width="207"
+				creationComplete="cboCategories_creationCompleteHandler(event)" labelField="label">
+		<s:AsyncListView list="{getCategoriesResult.lastResult}"/>
+	</s:ComboBox>
+	<s:Label id="lblCats" includeIn="editBook" x="960" y="17" text="Categories"/>
+	<s:Button id="btnAddCatToBook" includeIn="editBook" x="960" y="66" label="Add Cat. to Book"
+			  click="btnAddCatToBook_clickHandler(event)" fontSize="10"/>
+	<s:Button id="dgDeleteCat" includeIn="editBook" x="797" y="100" label="Delete Selected from Book"
+			  click="dgDeleteCat_clickHandler(event)" fontSize="10"/>
+	<s:Button id="btnSaveEdits" includeIn="editBook" x="10" y="833" width="123"
+			  label="Save Book Edits" click="button_clickHandler(event)"/>
+	<s:Button id="btnCreateNew" includeIn="editBook" x="141" y="802" label="Create New Book"
+			  click="btnCreateNew_clickHandler(event)"/>
+	<mx:HRule includeIn="editBook" x="774" y="131" width="420" height="28"/>
+	<mx:HRule includeIn="editBook" x="774" y="406" width="420" height="28"/>
+	<mx:HRule includeIn="editBook" x="768" y="701" width="420" height="28"/>
+	<s:Label id="lblEditions" includeIn="editBook" x="932" y="153" text="Editions"/>
+	<s:Label id="lblAssets" includeIn="editBook" x="932" y="429" text="Assets"/>
+	<s:Label id="lblPrice" includeIn="editBook" x="770" y="285" text="Price"/>
+	<s:Label id="lblISBN" includeIn="editBook" x="922" y="282" text="ISBN"/>
+	<s:DataGrid id="dgEditions" includeIn="editBook" x="770" y="167" width="397" height="105"
+				requestedRowCount="4" dataProvider="{getEditionsForBookResult.lastResult}" doubleClickEnabled="true" doubleClick="this.getEditionsDetails(this.dgEditions.selectedItem.id)">
+		<s:columns>
+			<s:ArrayList>
+				<s:GridColumn dataField="price" headerText="price"></s:GridColumn>
+				<s:GridColumn dataField="weight" headerText="weight"></s:GridColumn>
+				<s:GridColumn dataField="isbn" headerText="isbn"></s:GridColumn>
+				<s:GridColumn dataField="format" headerText="format"></s:GridColumn>
+				<s:GridColumn dataField="out_of_print" headerText="no print" width="60"></s:GridColumn>
+				<s:GridColumn dataField="not_for_sale" headerText="no Sale" width="65"></s:GridColumn>
+			</s:ArrayList>
+		</s:columns>
+	</s:DataGrid>
+	<s:TextInput id="txtPrice" includeIn="editBook" x="769" y="302"/>
+	<s:TextInput id="txtISBM" includeIn="editBook" x="918" y="302" width="242"/>
+	<s:Label id="lblFormat" includeIn="editBook" x="770" y="332" text="Format"/>
+	<s:Label id="lblWeight" includeIn="editBook" x="919" y="332" text="Weight"/>
+	<s:Label id="lblForSale" includeIn="editBook" x="990" y="332" text="Not For Sale"/>
+	<s:Label id="lblInPrint" includeIn="editBook" x="1073" y="332" text="Out of Print"/>
+	<s:TextInput id="txtFormat" includeIn="editBook" x="770" y="346"/>
+	<s:TextInput id="txtWeight" includeIn="editBook" x="919" y="347" width="56"/>
+	<s:TextInput id="txtForSale" includeIn="editBook" x="1016" y="348" width="22"/>
+	<s:TextInput id="txtInPrint" includeIn="editBook" x="1091" y="348" width="25"/>
+	<s:Button id="btnSaveEditionChanges" includeIn="editBook" x="770" y="382" label="Save Changes"
+			  click="btnSaveEditionChanges_clickHandler(event)" visible="false"/>
+	<s:Button id="btnCreateNewEdition" includeIn="editBook" x="877" y="383"
+			  label="Create New Edition" click="btnCreateNewEdition_clickHandler(event)"/>
+	<s:Button id="btnSaveNewEdition" includeIn="editBook" visible="false" x="1018" y="383"
+			  label="Save New Edition" click="btnSaveNewEdition_clickHandler(event)"/>
+	<s:DataGrid id="dgAssets" includeIn="editBook" x="774" y="452" width="393" height="129"
+				
+				doubleClick="handleAssetDoubleClick()" doubleClickEnabled="true"
+				requestedRowCount="4">
+		<s:columns>
+			<s:ArrayList>
+				
+				<s:GridColumn dataField="position" headerText="pos." width="55"></s:GridColumn>
+				
+				
+				<s:GridColumn dataField="fileName" headerText="fileName"></s:GridColumn>
+				
+				<s:GridColumn dataField="photoTypeName" headerText="photoTypeName"></s:GridColumn>
+				
+				
+			</s:ArrayList>
+		</s:columns>
+		<s:AsyncListView list="{getNewPhotoAssetsForBookResult.lastResult}"/>
+	</s:DataGrid>
+	<s:Label id="lblPosition" includeIn="editBook" x="777" y="589" text="Position "/>
+	<s:Label id="lblFileName" includeIn="editBook" x="834" y="588" text="FileName"/>
+	<s:TextInput id="txtPosition" includeIn="editBook" x="777" y="609" width="43"/>
+	<s:TextInput id="txtFileName" includeIn="editBook" x="834" y="609" width="333"/>
+	<s:Button id="btnSaveAssetChanges" includeIn="editBook" x="777" y="644" label="Save Changes"
+			  click="btnSaveAssetChanges_clickHandler(event)" visible="true"/>
+	<s:Button id="btnCreateNewAsset" includeIn="editBook" x="1021" y="671" label="Create New Asset"
+			  click="btnCreateNewAsset_clickHandler(event)" visible="true"/>
+	<s:Button id="btnSaveNewAsset" includeIn="editBook" x="1021" y="689" width="116"
+			  label="Save New Asset" click="btnSaveNewAsset_clickHandler(event)" visible="false"/>
+	<s:Button id="btnDeleteAsset" includeIn="editBook" visible="true" x="872" y="676" width="160"
+			  label="Delete Selected Asset" click="btnDeleteAsset_clickHandler(event)" />
+	<s:Button id="btnRelatedMaterials" includeIn="editBook" x="770" y="757" width="397" height="66"
+			  label="Related Materials for this Book"
+			  click="btnRelatedMaterials_clickHandler(event)"/>
+	<s:Label includeIn="relatedMaterials" x="279" y="49" fontSize="24"
+			 text="Related Materials for {bookDetails.title}"/>
+	<s:Button id="btnReturnToDetailPage" includeIn="relatedMaterials" x="816" y="458" width="160"
+			  label="Return to Book Details" click="btnReturnToDetailPage_clickHandler(event)"/>
+	<s:ComboBox id="cboRelatedClasses" includeIn="relatedMaterials" x="778" y="296" width="185"
+				creationComplete="cboRelatedClasses_creationCompleteHandler(event)"
+				labelField="label" visible="false">
+		<s:AsyncListView list="{getRelatedClassesResult.lastResult}"/>
+	</s:ComboBox>
+	<components:comboBox2 id="cboRelatedClassType" x="816" y="357" dataProvider="{getRelatedClassesResult.lastResult}" includeIn="relatedMaterials" />
+	<s:DataGrid id="dgRelatedItems" includeIn="relatedMaterials" x="199" y="108" width="603"
+				creationComplete="dataGrid_creationCompleteHandler(event)"
+				dataProvider="{getRelatedItemsForBookResult.lastResult}" doubleClickEnabled="true"
+				 doubleClick="getRelatedDetails(this.dgRelatedItems.selectedItem.id)" requestedRowCount="4" >
+		<s:columns>
+			<s:ArrayList>
+				<s:GridColumn dataField="title" headerText="title"></s:GridColumn>
+				<s:GridColumn dataField="relatedClass" headerText="Type" width="150"></s:GridColumn>
+			</s:ArrayList>
+		</s:columns>
+	</s:DataGrid>
+	<s:Label id="lblItemTitle" includeIn="relatedMaterials" x="476" y="251" text="Item Title"/>
+	<s:TextInput id="txtItemTitle" includeIn="relatedMaterials" x="296" y="271" width="409"/>
+	<s:Label includeIn="relatedMaterials" x="466" y="299" text="Item Content"/>
+	<s:TextArea id="txtContent" includeIn="relatedMaterials" x="199" y="324" width="599" height="115"/>
+	<s:Button id="btnSaveCurrentRelatedChange" includeIn="relatedMaterials" x="199" y="458"
+			  label="Save Changes" click="btnSaveCurrentRelatedChange_clickHandler(event)"/>
+	<s:Button id="tnCreateNewRelatedItem" includeIn="relatedMaterials" x="331" y="458"
+			  label="Create New Related Item" click="tnCreateNewRelatedItem_clickHandler(event)"/>
+	<s:Button id="btnSaveNewRelatedItem" includeIn="relatedMaterials" x="517" y="458"
+			  label="Save New Item" click="btnSaveNewRelatedItem_clickHandler(event)"/>
+	<s:Button id="btnDeleteRelated" includeIn="relatedMaterials" x="647" y="458"
+			  label="Delete Related Item" click="btnDeleteRelated_clickHandler(event)"/>
+	<s:Label includeIn="State1" x="305" y="32" fontSize="24"
+			 text="Eakins Press Publication Data Editor"/>
+	<s:Label includeIn="relatedMaterials" x="836" y="337" text="Related Material Type"/>
+	<s:Label includeIn="State1" x="446" y="64" text="Double Click to Edit"/>
+	<s:Button id="btnGotoCreateNewBook" includeIn="State1" x="768" y="34" width="163"
+			  label="Create New Book" click="btnGotoCreateNewBook_clickHandler(event)"/>
+	<s:Button id="btnSaveNewBook" includeIn="editBook" x="141" y="833" width="115"
+			  label="Save New Book" click="btnSaveNewBook_clickHandler(event)"/>
+	<s:Button id="btnReturnToTop" includeIn="relatedMaterials" x="817" y="485" width="159"
+			  label="Return to First Page" click="btnReturnToTop_clickHandler(event)"/>
+	<components:comboBox2 id="cboNewPhotoType" includeIn="editBook" x="1011" y="639" dataProvider="{getNewPhotoTypesResult.lastResult}"/>
+	<s:Button id="btnSetFeatures" includeIn="State1" x="768" y="94" width="163"
+			  label="Set Home Page Features" click="btnSetFeatures_clickHandler(event)"/>
+	<s:DataGrid id="dgAvailableHeroes" includeIn="homePageFeatures" x="65" y="99" width="549"
+				height="253" requestedRowCount="4" doubleClickEnabled="true" doubleClick="handleHeroCandidateDoubleClick()">
+		<s:columns>
+			<s:ArrayList>
+				<s:GridColumn dataField="title" headerText="title" width="300"></s:GridColumn>
+				<s:GridColumn dataField="fileName" headerText="fileName"></s:GridColumn>
+				<s:GridColumn dataField="assetPhotoType" headerText="assetPhotoType" width="100"></s:GridColumn>
+			</s:ArrayList>
+		</s:columns>
+		<s:typicalItem>
+			<fx:Object id="id1" assetPhotoType="assetPhotoType1" fileName="fileName1" title="title1"></fx:Object>
+		</s:typicalItem>
+		<s:AsyncListView list="{getAvailableHomePageFeaturesResult.lastResult}"/>
+	</s:DataGrid>
+	<s:TextInput id="txtHeroBookTitle" includeIn="homePageFeatures" x="65" y="424" width="406"/>
+	<s:TextInput id="txtHeroPosition" includeIn="homePageFeatures" x="485" y="424" width="47"/>
+	<s:Button id="btnDisplayHeroImage" includeIn="homePageFeatures" x="67" y="473"
+			  label="Display Hero Image" click="btnDisplayHeroImage_clickHandler(event)"/>
+	<s:Label id="lblHeroBook" includeIn="homePageFeatures" x="67" y="404" text="Book"/>
+	<s:Label id="lblHeroPosition" includeIn="homePageFeatures" x="485" y="404" text="Position"/>
+	<s:DataGrid id="dgCurrentHeroes" includeIn="homePageFeatures" x="655" y="101" width="335" height="251"
+				creationComplete="dataGrid_creationCompleteHandler(event)" requestedRowCount="4">
+		<s:columns>
+			<s:ArrayList>
+				
+				<s:GridColumn dataField="position" headerText="position" width="20"></s:GridColumn>
+				<s:GridColumn dataField="title" headerText="title"></s:GridColumn>
+				
+			</s:ArrayList>
+		</s:columns>
+		
+		<s:AsyncListView list="{getHeroImagesResult2.lastResult}"/>
+	</s:DataGrid>
+	<s:Button id="btnDeleteSelectedHero" includeIn="homePageFeatures" x="659" y="422"
+			  label="Delete Selected Hero" click="btnDeleteSelectedHero_clickHandler(event)"/>
+	<s:Label includeIn="homePageFeatures" x="387" y="26" fontSize="24" text="Hero Image Controls"/>
+	<s:Label includeIn="homePageFeatures" x="267" y="68" text="Available Books With Hero Images"/>
+	<s:Label includeIn="homePageFeatures" x="777" y="72" text="Current Hero Queue"/>
+	<s:Button includeIn="homePageFeatures" x="872" y="509" label="Cancel"
+			  click="button1_clickHandler(event)"/>
+	<s:TextArea id="txtOldNews" includeIn="relatedMaterials" x="96" y="515" width="834" />
+	<s:Button id="btnUploadState" includeIn="State1" x="768" y="147" width="163"
+			  label="Upload Images Files" click="btnUploadState_clickHandler(event)"/>
+	<s:Label id="message" includeIn="uploadFiles" x="343" y="76"/>
+	<s:Button includeIn="uploadFiles" x="128" y="155" label="Upload Portrait File" click="browseAndUpload();"/>
+	<mx:ProgressBar id="progressBar" includeIn="uploadFiles" x="399" y="334" indeterminate="true" visible="false"/>
+	<s:Button id="btnUploadHero" includeIn="uploadFiles" x="429" y="155" label="Upload Hero File" click="uploadHero();" />
+	<s:Button id="btnUploadSpreads" includeIn="uploadFiles" x="724" y="155" label="Upload Spread File" click="uploadSpread();"/>
+	<s:Label includeIn="uploadFiles" x="347" y="14" fontSize="32" text="Upload Book Images"/>
+	<s:Button id="btnReturnFromUpload" includeIn="uploadFiles" x="470" y="594" label="Return"
+			  click="btnReturnFromUpload_clickHandler(event)"/>
+	<s:Label includeIn="State1" x="95" y="22" text="Version 1.2"/>
+</s:WindowedApplication>
