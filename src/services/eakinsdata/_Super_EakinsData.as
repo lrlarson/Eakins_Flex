@@ -164,8 +164,8 @@ internal class _Super_EakinsData extends com.adobe.fiber.services.wrapper.Remote
         _serviceControl.operations = operations;
         _serviceControl.convertResultHandler = com.adobe.serializers.utility.TypeUtility.convertResultHandler;
         _serviceControl.convertParametersHandler = com.adobe.serializers.utility.TypeUtility.convertCFAMFParametersHandler;
-        _serviceControl.source = "data.eakinsData";
-        _serviceControl.endpoint = "http://eakinspress.com/flex2gateway/";
+		_serviceControl.source = "data.eakinsData";
+		_serviceControl.endpoint = "http://eakinspress-org.securec75.ezhostingserver.com/flex2gateway/";
 
 
          preInitializeService();

@@ -55,6 +55,7 @@ public class _Super_RelatedItemDetails extends flash.events.EventDispatcher impl
     private var _internal_content : String;
     private var _internal_title : String;
     private var _internal_book_id : int;
+    private var _internal_link : String;
     private var _internal_relatedItemClass : int;
 
     private static var emptyArray:Array = new Array();
@@ -74,6 +75,7 @@ public class _Super_RelatedItemDetails extends flash.events.EventDispatcher impl
         // Bind to own data or source properties for cache invalidation triggering
         model_internal::_changeWatcherArray.push(mx.binding.utils.ChangeWatcher.watch(this, "content", model_internal::setterListenerContent));
         model_internal::_changeWatcherArray.push(mx.binding.utils.ChangeWatcher.watch(this, "title", model_internal::setterListenerTitle));
+        model_internal::_changeWatcherArray.push(mx.binding.utils.ChangeWatcher.watch(this, "link", model_internal::setterListenerLink));
 
     }
 
@@ -103,6 +105,12 @@ public class _Super_RelatedItemDetails extends flash.events.EventDispatcher impl
     public function get book_id() : int
     {
         return _internal_book_id;
+    }
+
+    [Bindable(event="propertyChange")]
+    public function get link() : String
+    {
+        return _internal_link;
     }
 
     [Bindable(event="propertyChange")]
@@ -159,6 +167,16 @@ public class _Super_RelatedItemDetails extends flash.events.EventDispatcher impl
         }
     }
 
+    public function set link(value:String) : void
+    {
+        var oldValue:String = _internal_link;
+        if (oldValue !== value)
+        {
+            _internal_link = value;
+            this.dispatchEvent(mx.events.PropertyChangeEvent.createUpdateEvent(this, "link", oldValue, _internal_link));
+        }
+    }
+
     public function set relatedItemClass(value:int) : void
     {
         var oldValue:int = _internal_relatedItemClass;
@@ -191,6 +209,11 @@ public class _Super_RelatedItemDetails extends flash.events.EventDispatcher impl
         _model.invalidateDependentOnTitle();
     }
 
+    model_internal function setterListenerLink(value:flash.events.Event):void
+    {
+        _model.invalidateDependentOnLink();
+    }
+
 
     /**
      * valid related derived properties
@@ -221,6 +244,11 @@ public class _Super_RelatedItemDetails extends flash.events.EventDispatcher impl
         {
             propertyValidity = false;
             com.adobe.fiber.util.FiberUtils.arrayAdd(validationFailureMessages, _model.model_internal::_titleValidationFailureMessages);
+        }
+        if (!_model.linkIsValid)
+        {
+            propertyValidity = false;
+            com.adobe.fiber.util.FiberUtils.arrayAdd(validationFailureMessages, _model.model_internal::_linkValidationFailureMessages);
         }
 
         model_internal::_cacheInitialized_isValid = true;
@@ -351,6 +379,33 @@ public class _Super_RelatedItemDetails extends flash.events.EventDispatcher impl
 
         model_internal::_doValidationCacheOfTitle = validationFailures;
         model_internal::_doValidationLastValOfTitle = value;
+
+        return validationFailures;
+    }
+    
+    model_internal var _doValidationCacheOfLink : Array = null;
+    model_internal var _doValidationLastValOfLink : String;
+
+    model_internal function _doValidationForLink(valueIn:Object):Array
+    {
+        var value : String = valueIn as String;
+
+        if (model_internal::_doValidationCacheOfLink != null && model_internal::_doValidationLastValOfLink == value)
+           return model_internal::_doValidationCacheOfLink ;
+
+        _model.model_internal::_linkIsValidCacheInitialized = true;
+        var validationFailures:Array = new Array();
+        var errorMessage:String;
+        var failure:Boolean;
+
+        var valRes:ValidationResult;
+        if (_model.isLinkAvailable && _internal_link == null)
+        {
+            validationFailures.push(new ValidationResult(true, "", "", "link is required"));
+        }
+
+        model_internal::_doValidationCacheOfLink = validationFailures;
+        model_internal::_doValidationLastValOfLink = value;
 
         return validationFailures;
     }

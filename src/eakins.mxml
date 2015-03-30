@@ -5,8 +5,9 @@
 					   xmlns:eakinsdata="services.eakinsdata.*"
 					   xmlns:valueObjects="valueObjects.*"
 					   xmlns:components="components.*"
-					   width="1000" height="700"
-					   width.editBook="1200" height.editBook="900" creationComplete="init()">
+					   width="1000" height="700" creationComplete="init()"
+					   width.editBook="1200" height.editBook="900"
+					   height.relatedMaterials="800">
 	<fx:Script>
 		<![CDATA[
 			import flash.utils.Timer;
@@ -429,6 +430,7 @@
 				this.txtContent.text = this.dgRelatedItems.selectedItem.content;
 				this.cboRelatedClassType.selectedValue = this.dgRelatedItems.selectedItem.itemClass;
 				this.currentRelatedItem = this.dgRelatedItems.selectedItem.id;
+				this.txtLink.text = this.dgRelatedItems.selectedItem.link;
 				this.btnSaveCurrentRelatedChange.visible = true;
 				this.btnDeleteRelated.visible = true;
 				
@@ -451,6 +453,7 @@
 				updateItem.itemClass = this.cboRelatedClassType.selectedItem.data;
 				updateItem.title = this.txtItemTitle.text;
 				updateItem.id = this.currentRelatedItem;
+				updateItem.link = this.txtLink.text;
 				updateRelatedItemResult.token = eakinsData.updateRelatedItem(updateItem);
 				
 			}
@@ -458,6 +461,7 @@
 			protected function clearRelatedItemForm():void{
 				this.txtContent.text = '';
 				this.txtItemTitle.text = '';
+				this.txtLink.text = '';
 				this.btnSaveCurrentRelatedChange.visible = false;
 				this.btnSaveNewRelatedItem.visible = false;
 				this.btnDeleteRelated.visible = false;
@@ -484,6 +488,7 @@
 				newItem.content = this.txtContent.text;
 				newItem.itemClass = this.cboRelatedClassType.selectedItem.data;
 				newItem.title = this.txtItemTitle.text;
+				newItem.link = this.txtItemTitle.text;
 				insertNewRelatedItemResult.token = eakinsData.insertNewRelatedItem(newItem);
 				
 			}
@@ -990,7 +995,7 @@
 		<s:AsyncListView list="{getRelatedClassesResult.lastResult}"/>
 	</s:ComboBox>
 	<components:comboBox2 id="cboRelatedClassType" x="816" y="357" dataProvider="{getRelatedClassesResult.lastResult}" includeIn="relatedMaterials" />
-	<s:DataGrid id="dgRelatedItems" includeIn="relatedMaterials" x="199" y="108" width="603"
+	<s:DataGrid id="dgRelatedItems" includeIn="relatedMaterials" x="199" y="83" width="603"
 				creationComplete="dataGrid_creationCompleteHandler(event)"
 				dataProvider="{getRelatedItemsForBookResult.lastResult}" doubleClickEnabled="true"
 				 doubleClick="getRelatedDetails(this.dgRelatedItems.selectedItem.id)" requestedRowCount="4" >
@@ -1001,10 +1006,11 @@
 			</s:ArrayList>
 		</s:columns>
 	</s:DataGrid>
-	<s:Label id="lblItemTitle" includeIn="relatedMaterials" x="476" y="251" text="Item Title"/>
-	<s:TextInput id="txtItemTitle" includeIn="relatedMaterials" x="296" y="271" width="409"/>
-	<s:Label includeIn="relatedMaterials" x="466" y="299" text="Item Content"/>
-	<s:TextArea id="txtContent" includeIn="relatedMaterials" x="199" y="324" width="599" height="115"/>
+	<s:Label id="lblItemTitle" includeIn="relatedMaterials" x="476" y="224" text="Item Title"/>
+	<s:Label id="lblItemTitle0" includeIn="relatedMaterials" x="476" y="269" text="Item Link"/>
+	<s:TextInput id="txtItemTitle" includeIn="relatedMaterials" x="296" y="238" width="409"/>
+	<s:Label includeIn="relatedMaterials" x="466" y="316" text="Item Content"/>
+	<s:TextArea id="txtContent" includeIn="relatedMaterials" x="199" y="334" width="599" height="115"/>
 	<s:Button id="btnSaveCurrentRelatedChange" includeIn="relatedMaterials" x="199" y="458"
 			  label="Save Changes" click="btnSaveCurrentRelatedChange_clickHandler(event)"/>
 	<s:Button id="tnCreateNewRelatedItem" includeIn="relatedMaterials" x="331" y="458"
@@ -1066,7 +1072,9 @@
 	<s:Label includeIn="homePageFeatures" x="777" y="72" text="Current Hero Queue"/>
 	<s:Button includeIn="homePageFeatures" x="872" y="509" label="Cancel"
 			  click="button1_clickHandler(event)"/>
-	<s:TextArea id="txtOldNews" includeIn="relatedMaterials" x="96" y="515" width="834" />
+	<s:TextArea id="txtOldNews" includeIn="relatedMaterials" x="96" y="515" width="834" visible="false" />
+	<mx:HTML id="html" includeIn="relatedMaterials" visible="true" x="96" y="515" width="834"
+			 height="265" location="http://www.eakinspress.com/relatedItemsToolFlex.cfm?slug={this.slug_txt.text}"/>
 	<s:Button id="btnUploadState" includeIn="State1" x="768" y="147" width="163"
 			  label="Upload Images Files" click="btnUploadState_clickHandler(event)"/>
 	<s:Label id="message" includeIn="uploadFiles" x="343" y="76"/>
@@ -1077,5 +1085,6 @@
 	<s:Label includeIn="uploadFiles" x="347" y="14" fontSize="32" text="Upload Book Images"/>
 	<s:Button id="btnReturnFromUpload" includeIn="uploadFiles" x="470" y="594" label="Return"
 			  click="btnReturnFromUpload_clickHandler(event)"/>
-	<s:Label includeIn="State1" x="95" y="22" text="Version 1.2"/>
+	<s:Label includeIn="State1" x="95" y="22" text="Version 1.4&#xd;"/>
+	<s:TextInput id="txtLink" includeIn="relatedMaterials" x="296" y="285" width="409"/>
 </s:WindowedApplication>
