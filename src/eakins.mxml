@@ -23,8 +23,10 @@
 			import valueObjects.RelatedItemDetails;
 			import valueObjects.RelatedItems;
 			
-			public var currentBookID:int;
+			[bindable]
+			public var uploadedImage:String;
 			
+			public var currentBookID:int;
 			public var currentRelatedItem:int;
 			
 			//file upload
@@ -71,8 +73,10 @@
 				myTimer.start();
 				myTimer.addEventListener(TimerEvent.TIMER_COMPLETE,onCompleteUpload);
 				
-				message.text += " -- The file has been successfully uploaded"; 
+				message.text += " -- The file" + evt.currentTarget.name + " has been successfully uploaded"; 
+				uploadedImage = evt.currentTarget.name; 
 				//progressBar.visible = false; 
+				this.lblBlogFileName.text = "To add the image to the blog, use this code: ----  ![alt](http://www.eakinspress.com/images/blogImages/" + uploadedImage;
 			}
 			
 			private function onCompleteUpload(e:Event):void{
@@ -426,6 +430,7 @@
 			protected function getRelatedDetails(id:Number):void
 			{
 				//getRelatedDetailsResult.token = eakinsData.getRelatedDetails(id);
+				this.tiPublish.text = this.dgRelatedItems.selectedItem.publish;
 				this.txtItemTitle.text = this.dgRelatedItems.selectedItem.title;
 				this.txtContent.text = this.dgRelatedItems.selectedItem.content;
 				this.cboRelatedClassType.selectedValue = this.dgRelatedItems.selectedItem.itemClass;
@@ -454,6 +459,7 @@
 				updateItem.title = this.txtItemTitle.text;
 				updateItem.id = this.currentRelatedItem;
 				updateItem.link = this.txtLink.text;
+				updateItem.publish = this.tiPublish.text;
 				updateRelatedItemResult.token = eakinsData.updateRelatedItem(updateItem);
 				
 			}
@@ -465,6 +471,7 @@
 				this.btnSaveCurrentRelatedChange.visible = false;
 				this.btnSaveNewRelatedItem.visible = false;
 				this.btnDeleteRelated.visible = false;
+				this.tiPublish.text = '';
 			}
 			
 			protected function tnCreateNewRelatedItem_clickHandler(event:MouseEvent):void
@@ -774,11 +781,21 @@
 				
 			}
 			
+			protected function btnUploadBlog_clickHandler(event:MouseEvent):void
+			{
+				this.fileUploadString = 'http://www.eakinspress.com/images/blogImages/uploadBlogImages.cfm';
+				fileRef.browse(); 
+				message.text = ""; 
+				
+			}
+			
 			protected function btnReturnFromUpload_clickHandler(event:MouseEvent):void
 			{
 				// TODO Auto-generated method stub
 				this.currentState = 'State1';
 			}
+			
+			
 			
 		]]>
 	</fx:Script>
@@ -1008,6 +1025,7 @@
 	</s:DataGrid>
 	<s:Label id="lblItemTitle" includeIn="relatedMaterials" x="476" y="224" text="Item Title"/>
 	<s:Label id="lblItemTitle0" includeIn="relatedMaterials" x="476" y="269" text="Item Link"/>
+	<s:Label id="lblItemTitle1" includeIn="relatedMaterials" x="736" y="244" text="Publish This Item:"/>
 	<s:TextInput id="txtItemTitle" includeIn="relatedMaterials" x="296" y="238" width="409"/>
 	<s:Label includeIn="relatedMaterials" x="466" y="316" text="Item Content"/>
 	<s:TextArea id="txtContent" includeIn="relatedMaterials" x="199" y="334" width="599" height="115"/>
@@ -1080,11 +1098,19 @@
 	<s:Label id="message" includeIn="uploadFiles" x="343" y="76"/>
 	<s:Button includeIn="uploadFiles" x="128" y="155" label="Upload Portrait File" click="browseAndUpload();"/>
 	<mx:ProgressBar id="progressBar" includeIn="uploadFiles" x="399" y="334" indeterminate="true" visible="false"/>
-	<s:Button id="btnUploadHero" includeIn="uploadFiles" x="429" y="155" label="Upload Hero File" click="uploadHero();" />
-	<s:Button id="btnUploadSpreads" includeIn="uploadFiles" x="724" y="155" label="Upload Spread File" click="uploadSpread();"/>
+	<s:Button id="btnUploadHero" includeIn="uploadFiles" x="334" y="155" label="Upload Hero File" click="uploadHero();" />
+	<s:Button id="btnUploadSpreads" includeIn="uploadFiles" x="533" y="155" label="Upload Spread File" click="uploadSpread();"/>
 	<s:Label includeIn="uploadFiles" x="347" y="14" fontSize="32" text="Upload Book Images"/>
 	<s:Button id="btnReturnFromUpload" includeIn="uploadFiles" x="470" y="594" label="Return"
 			  click="btnReturnFromUpload_clickHandler(event)"/>
-	<s:Label includeIn="State1" x="95" y="22" text="Version 1.4&#xd;"/>
+	<s:Label includeIn="State1" x="95" y="22" text="Version 1.6&#xd;4/30/15"/>
 	<s:TextInput id="txtLink" includeIn="relatedMaterials" x="296" y="285" width="409"/>
+	<s:Button id="btnUploadBlog" includeIn="uploadFiles" x="721" y="155" label="Upload Blog Images"
+			  click="btnUploadBlog_clickHandler(event)"/>
+	<s:TextArea includeIn="uploadFiles" x="301" y="264" width="349" height="92" id="lblBlogFileName"
+			 />
+	<s:TextInput id="tiPublish" includeIn="relatedMaterials" x="838" y="238" width="24"/>
+	<s:Label includeIn="relatedMaterials" x="834" y="269" text="0 = do not publish"/>
+	<s:Label includeIn="relatedMaterials" x="834" y="281" text="1 = publish"/>
+	
 </s:WindowedApplication>

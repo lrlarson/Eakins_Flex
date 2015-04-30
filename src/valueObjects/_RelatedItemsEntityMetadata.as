@@ -22,14 +22,14 @@ internal class _RelatedItemsEntityMetadata extends com.adobe.fiber.valueobjects.
 {
     private static var emptyArray:Array = new Array();
 
-    model_internal static var allProperties:Array = new Array("id", "content", "relatedClass", "title", "itemClass", "book_id", "link");
+    model_internal static var allProperties:Array = new Array("id", "content", "relatedClass", "title", "itemClass", "book_id", "link", "publish");
     model_internal static var allAssociationProperties:Array = new Array();
-    model_internal static var allRequiredProperties:Array = new Array("id", "content", "relatedClass", "title", "itemClass", "book_id", "link");
-    model_internal static var allAlwaysAvailableProperties:Array = new Array("id", "content", "relatedClass", "title", "itemClass", "book_id", "link");
+    model_internal static var allRequiredProperties:Array = new Array("id", "content", "relatedClass", "title", "itemClass", "book_id", "link", "publish");
+    model_internal static var allAlwaysAvailableProperties:Array = new Array("id", "content", "relatedClass", "title", "itemClass", "book_id", "link", "publish");
     model_internal static var guardedProperties:Array = new Array();
-    model_internal static var dataProperties:Array = new Array("id", "content", "relatedClass", "title", "itemClass", "book_id", "link");
+    model_internal static var dataProperties:Array = new Array("id", "content", "relatedClass", "title", "itemClass", "book_id", "link", "publish");
     model_internal static var sourceProperties:Array = emptyArray
-    model_internal static var nonDerivedProperties:Array = new Array("id", "content", "relatedClass", "title", "itemClass", "book_id", "link");
+    model_internal static var nonDerivedProperties:Array = new Array("id", "content", "relatedClass", "title", "itemClass", "book_id", "link", "publish");
     model_internal static var derivedProperties:Array = new Array();
     model_internal static var collectionProperties:Array = new Array();
     model_internal static var collectionBaseMap:Object;
@@ -58,6 +58,11 @@ internal class _RelatedItemsEntityMetadata extends com.adobe.fiber.valueobjects.
     model_internal var _linkValidator:com.adobe.fiber.styles.StyleValidator;
     model_internal var _linkIsValidCacheInitialized:Boolean = false;
     model_internal var _linkValidationFailureMessages:Array;
+    
+    model_internal var _publishIsValid:Boolean;
+    model_internal var _publishValidator:com.adobe.fiber.styles.StyleValidator;
+    model_internal var _publishIsValidCacheInitialized:Boolean = false;
+    model_internal var _publishValidationFailureMessages:Array;
 
     model_internal var _instance:_Super_RelatedItems;
     model_internal static var _nullStyle:com.adobe.fiber.styles.Style = new com.adobe.fiber.styles.Style();
@@ -76,6 +81,7 @@ internal class _RelatedItemsEntityMetadata extends com.adobe.fiber.valueobjects.
             model_internal::dependentsOnMap["itemClass"] = new Array();
             model_internal::dependentsOnMap["book_id"] = new Array();
             model_internal::dependentsOnMap["link"] = new Array();
+            model_internal::dependentsOnMap["publish"] = new Array();
 
             // collection base map
             model_internal::collectionBaseMap = new Object();
@@ -90,6 +96,7 @@ internal class _RelatedItemsEntityMetadata extends com.adobe.fiber.valueobjects.
         model_internal::propertyTypeMap["itemClass"] = "int";
         model_internal::propertyTypeMap["book_id"] = "int";
         model_internal::propertyTypeMap["link"] = "String";
+        model_internal::propertyTypeMap["publish"] = "String";
 
         model_internal::_instance = value;
         model_internal::_contentValidator = new StyleValidator(model_internal::_instance.model_internal::_doValidationForContent);
@@ -112,6 +119,11 @@ internal class _RelatedItemsEntityMetadata extends com.adobe.fiber.valueobjects.
         model_internal::_linkValidator.requiredFieldError = "link is required";
         //model_internal::_linkValidator.source = model_internal::_instance;
         //model_internal::_linkValidator.property = "link";
+        model_internal::_publishValidator = new StyleValidator(model_internal::_instance.model_internal::_doValidationForPublish);
+        model_internal::_publishValidator.required = true;
+        model_internal::_publishValidator.requiredFieldError = "publish is required";
+        //model_internal::_publishValidator.source = model_internal::_instance;
+        //model_internal::_publishValidator.property = "publish";
     }
 
     override public function getEntityName():String
@@ -380,6 +392,12 @@ internal class _RelatedItemsEntityMetadata extends com.adobe.fiber.valueobjects.
         return true;
     }
 
+    [Bindable(event="propertyChange")]
+    public function get isPublishAvailable():Boolean
+    {
+        return true;
+    }
+
 
     /**
      * derived property recalculation
@@ -414,6 +432,14 @@ internal class _RelatedItemsEntityMetadata extends com.adobe.fiber.valueobjects.
         {
             model_internal::_instance.model_internal::_doValidationCacheOfLink = null;
             model_internal::calculateLinkIsValid();
+        }
+    }
+    public function invalidateDependentOnPublish():void
+    {
+        if (model_internal::_publishIsValidCacheInitialized )
+        {
+            model_internal::_instance.model_internal::_doValidationCacheOfPublish = null;
+            model_internal::calculatePublishIsValid();
         }
     }
 
@@ -840,6 +866,106 @@ internal class _RelatedItemsEntityMetadata extends com.adobe.fiber.valueobjects.
         }
     }
 
+    [Bindable(event="propertyChange")]   
+    public function get publishStyle():com.adobe.fiber.styles.Style
+    {
+        return model_internal::_nullStyle;
+    }
+
+    public function get publishValidator() : StyleValidator
+    {
+        return model_internal::_publishValidator;
+    }
+
+    model_internal function set _publishIsValid_der(value:Boolean):void 
+    {
+        var oldValue:Boolean = model_internal::_publishIsValid;         
+        if (oldValue !== value)
+        {
+            model_internal::_publishIsValid = value;
+            this.dispatchEvent(mx.events.PropertyChangeEvent.createUpdateEvent(this, "publishIsValid", oldValue, value));
+        }                             
+    }
+
+    [Bindable(event="propertyChange")]
+    public function get publishIsValid():Boolean
+    {
+        if (!model_internal::_publishIsValidCacheInitialized)
+        {
+            model_internal::calculatePublishIsValid();
+        }
+
+        return model_internal::_publishIsValid;
+    }
+
+    model_internal function calculatePublishIsValid():void
+    {
+        var valRes:ValidationResultEvent = model_internal::_publishValidator.validate(model_internal::_instance.publish)
+        model_internal::_publishIsValid_der = (valRes.results == null);
+        model_internal::_publishIsValidCacheInitialized = true;
+        if (valRes.results == null)
+             model_internal::publishValidationFailureMessages_der = emptyArray;
+        else
+        {
+            var _valFailures:Array = new Array();
+            for (var a:int = 0 ; a<valRes.results.length ; a++)
+            {
+                _valFailures.push(valRes.results[a].errorMessage);
+            }
+            model_internal::publishValidationFailureMessages_der = _valFailures;
+        }
+    }
+
+    [Bindable(event="propertyChange")]
+    public function get publishValidationFailureMessages():Array
+    {
+        if (model_internal::_publishValidationFailureMessages == null)
+            model_internal::calculatePublishIsValid();
+
+        return _publishValidationFailureMessages;
+    }
+
+    model_internal function set publishValidationFailureMessages_der(value:Array) : void
+    {
+        var oldValue:Array = model_internal::_publishValidationFailureMessages;
+
+        var needUpdate : Boolean = false;
+        if (oldValue == null)
+            needUpdate = true;
+    
+        // avoid firing the event when old and new value are different empty arrays
+        if (!needUpdate && (oldValue !== value && (oldValue.length > 0 || value.length > 0)))
+        {
+            if (oldValue.length == value.length)
+            {
+                for (var a:int=0; a < oldValue.length; a++)
+                {
+                    if (oldValue[a] !== value[a])
+                    {
+                        needUpdate = true;
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                needUpdate = true;
+            }
+        }
+
+        if (needUpdate)
+        {
+            model_internal::_publishValidationFailureMessages = value;   
+            this.dispatchEvent(mx.events.PropertyChangeEvent.createUpdateEvent(this, "publishValidationFailureMessages", oldValue, value));
+            // Only execute calculateIsValid if it has been called before, to update the validationFailureMessages for
+            // the entire entity.
+            if (model_internal::_instance.model_internal::_cacheInitialized_isValid)
+            {
+                model_internal::_instance.model_internal::isValid_der = model_internal::_instance.model_internal::calculateIsValid();
+            }
+        }
+    }
+
 
      /**
      * 
@@ -880,6 +1006,10 @@ internal class _RelatedItemsEntityMetadata extends com.adobe.fiber.valueobjects.
             case("link"):
             {
                 return linkValidationFailureMessages;
+            }
+            case("publish"):
+            {
+                return publishValidationFailureMessages;
             }
             default:
             {

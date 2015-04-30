@@ -58,6 +58,7 @@ public class _Super_RelatedItems extends flash.events.EventDispatcher implements
     private var _internal_itemClass : int;
     private var _internal_book_id : int;
     private var _internal_link : String;
+    private var _internal_publish : String;
 
     private static var emptyArray:Array = new Array();
 
@@ -78,6 +79,7 @@ public class _Super_RelatedItems extends flash.events.EventDispatcher implements
         model_internal::_changeWatcherArray.push(mx.binding.utils.ChangeWatcher.watch(this, "relatedClass", model_internal::setterListenerRelatedClass));
         model_internal::_changeWatcherArray.push(mx.binding.utils.ChangeWatcher.watch(this, "title", model_internal::setterListenerTitle));
         model_internal::_changeWatcherArray.push(mx.binding.utils.ChangeWatcher.watch(this, "link", model_internal::setterListenerLink));
+        model_internal::_changeWatcherArray.push(mx.binding.utils.ChangeWatcher.watch(this, "publish", model_internal::setterListenerPublish));
 
     }
 
@@ -125,6 +127,12 @@ public class _Super_RelatedItems extends flash.events.EventDispatcher implements
     public function get link() : String
     {
         return _internal_link;
+    }
+
+    [Bindable(event="propertyChange")]
+    public function get publish() : String
+    {
+        return _internal_publish;
     }
 
     public function clearAssociations() : void
@@ -205,6 +213,16 @@ public class _Super_RelatedItems extends flash.events.EventDispatcher implements
         }
     }
 
+    public function set publish(value:String) : void
+    {
+        var oldValue:String = _internal_publish;
+        if (oldValue !== value)
+        {
+            _internal_publish = value;
+            this.dispatchEvent(mx.events.PropertyChangeEvent.createUpdateEvent(this, "publish", oldValue, _internal_publish));
+        }
+    }
+
     /**
      * Data/source property setter listeners
      *
@@ -235,6 +253,11 @@ public class _Super_RelatedItems extends flash.events.EventDispatcher implements
     model_internal function setterListenerLink(value:flash.events.Event):void
     {
         _model.invalidateDependentOnLink();
+    }
+
+    model_internal function setterListenerPublish(value:flash.events.Event):void
+    {
+        _model.invalidateDependentOnPublish();
     }
 
 
@@ -277,6 +300,11 @@ public class _Super_RelatedItems extends flash.events.EventDispatcher implements
         {
             propertyValidity = false;
             com.adobe.fiber.util.FiberUtils.arrayAdd(validationFailureMessages, _model.model_internal::_linkValidationFailureMessages);
+        }
+        if (!_model.publishIsValid)
+        {
+            propertyValidity = false;
+            com.adobe.fiber.util.FiberUtils.arrayAdd(validationFailureMessages, _model.model_internal::_publishValidationFailureMessages);
         }
 
         model_internal::_cacheInitialized_isValid = true;
@@ -461,6 +489,33 @@ public class _Super_RelatedItems extends flash.events.EventDispatcher implements
 
         model_internal::_doValidationCacheOfLink = validationFailures;
         model_internal::_doValidationLastValOfLink = value;
+
+        return validationFailures;
+    }
+    
+    model_internal var _doValidationCacheOfPublish : Array = null;
+    model_internal var _doValidationLastValOfPublish : String;
+
+    model_internal function _doValidationForPublish(valueIn:Object):Array
+    {
+        var value : String = valueIn as String;
+
+        if (model_internal::_doValidationCacheOfPublish != null && model_internal::_doValidationLastValOfPublish == value)
+           return model_internal::_doValidationCacheOfPublish ;
+
+        _model.model_internal::_publishIsValidCacheInitialized = true;
+        var validationFailures:Array = new Array();
+        var errorMessage:String;
+        var failure:Boolean;
+
+        var valRes:ValidationResult;
+        if (_model.isPublishAvailable && _internal_publish == null)
+        {
+            validationFailures.push(new ValidationResult(true, "", "", "publish is required"));
+        }
+
+        model_internal::_doValidationCacheOfPublish = validationFailures;
+        model_internal::_doValidationLastValOfPublish = value;
 
         return validationFailures;
     }

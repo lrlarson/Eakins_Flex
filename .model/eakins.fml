@@ -237,7 +237,7 @@
         <item name="analyzed">true</item>
       </annotation>
       <annotation name="ValidProperties">
-        <item name="propertySpecifier">id,content,relatedClass,title,itemClass,book_id,link</item>
+        <item name="propertySpecifier">id,content,relatedClass,title,itemClass,book_id,link,publish</item>
       </annotation>
       <annotation name="original signature">
         <item name="inputParams">float</item>
@@ -423,13 +423,13 @@
       <item name="EntityOriginalName">RelatedItems</item>
     </annotation>
     <annotation name="service Group">
-      <item name="service">EakinsData</item>
+      <item name="service">EakinsData,EakinsDataDummy</item>
     </annotation>
     <annotation name="ServerProperties">
       <item name="IncludeRemoteClass">nonempty</item>
     </annotation>
     <annotation name="getRelatedItemsForBook">
-      <item name="propertySpecifier">id,content,relatedClass,title,itemClass,book_id,link</item>
+      <item name="propertySpecifier">id,content,relatedClass,title,itemClass,book_id,link,publish</item>
     </annotation>
     <annotation name="ActionScriptGeneration">
       <item name="Package">valueObjects</item>
@@ -441,6 +441,7 @@
     <property name="itemClass" type="integer" required="true"/>
     <property name="book_id" type="integer" required="true"/>
     <property name="link" type="string" required="true"/>
+    <property name="publish" type="string" required="true"/>
   </entity>
   <entity name="RelatedItemDetails">
     <annotation name="EntityProperties">
